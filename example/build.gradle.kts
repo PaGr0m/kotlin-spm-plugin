@@ -1,8 +1,8 @@
 plugins {
     java
-    id("com.ncorti.kotlin.gradle.template.plugin")
+    id("org.zoldater.kotlin.gradle.spm.plugin")
 }
 
-templateExampleConfig {
+spm {
     message.set("Just trying this gradle plugin...")
 }

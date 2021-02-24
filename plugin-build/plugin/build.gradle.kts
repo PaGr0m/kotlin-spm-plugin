@@ -1,3 +1,5 @@
+import BuildPluginsVersion.KOTLIN
+
 plugins {
     kotlin("jvm")
     id("java-gradle-plugin")
@@ -7,6 +9,8 @@ plugins {
 dependencies {
     implementation(kotlin("stdlib-jdk7"))
     implementation(gradleApi())
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN")
+    implementation("org.jetbrains.kotlin:kotlin-native-utils:$KOTLIN")
 
     testImplementation(TestingLib.JUNIT)
 }

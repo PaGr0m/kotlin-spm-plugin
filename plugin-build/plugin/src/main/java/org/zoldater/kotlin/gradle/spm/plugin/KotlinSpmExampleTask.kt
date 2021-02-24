@@ -1,4 +1,4 @@
-package com.ncorti.kotlin.gradle.template.plugin
+package org.zoldater.kotlin.gradle.spm.plugin
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
@@ -9,7 +9,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 
-abstract class TemplateExampleTask : DefaultTask() {
+abstract class KotlinSpmExampleTask : DefaultTask() {
 
     init {
         description = "Just a sample template task"

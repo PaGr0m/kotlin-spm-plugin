@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.plugin.spm.entity.impl.ProductManager.Library.LibraryType
+import org.zoldater.kotlin.gradle.spm.entity.impl.ProductManager.Library.LibraryType
 
 plugins {
     java

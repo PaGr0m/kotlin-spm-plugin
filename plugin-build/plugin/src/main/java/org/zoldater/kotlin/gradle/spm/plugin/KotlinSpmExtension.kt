@@ -5,12 +5,12 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.util.ConfigureUtil
-import org.jetbrains.kotlin.gradle.plugin.spm.entity.Product
-import org.jetbrains.kotlin.gradle.plugin.spm.entity.Target
-import org.jetbrains.kotlin.gradle.plugin.spm.entity.impl.DependencyManager
-import org.jetbrains.kotlin.gradle.plugin.spm.entity.impl.ProductManager
-import org.jetbrains.kotlin.gradle.plugin.spm.entity.impl.SupportedPlatformManager
-import org.jetbrains.kotlin.gradle.plugin.spm.entity.impl.TargetManager
+import org.zoldater.kotlin.gradle.spm.entity.Product
+import org.zoldater.kotlin.gradle.spm.entity.Target
+import org.zoldater.kotlin.gradle.spm.entity.impl.DependencyManager
+import org.zoldater.kotlin.gradle.spm.entity.impl.ProductManager
+import org.zoldater.kotlin.gradle.spm.entity.impl.SupportedPlatformManager
+import org.zoldater.kotlin.gradle.spm.entity.impl.TargetManager
 import javax.inject.Inject
 
 @Suppress("UnnecessaryAbstractClass")

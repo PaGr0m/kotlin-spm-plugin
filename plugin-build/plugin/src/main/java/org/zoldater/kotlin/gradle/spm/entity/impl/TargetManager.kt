@@ -1,17 +1,12 @@
-/*
- * Copyright 2010-2021 JetBrains s.r.o. and Kotlin Programming Language contributors.
- * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
- */
-
-package org.jetbrains.kotlin.gradle.plugin.spm.entity.impl
+package org.zoldater.kotlin.gradle.spm.entity.impl
 
 import groovy.lang.Closure
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.util.ConfigureUtil
-import org.jetbrains.kotlin.gradle.plugin.spm.entity.Target
-import org.jetbrains.kotlin.gradle.plugin.spm.entity.TargetDependency
+import org.zoldater.kotlin.gradle.spm.entity.Target
+import org.zoldater.kotlin.gradle.spm.entity.TargetDependency
 import org.zoldater.kotlin.gradle.spm.utils.StringUnaryPlusContainer
 
 /**

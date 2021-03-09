@@ -16,6 +16,8 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         registerLinkKlibTask(project)
         registerSpmImportTask(project)
         registerGraphTask(project) // FIXME: tmp
+        registerGenerateSwiftPackage(project)
+        registerGenerateXcode(project)
     }
 
     private fun registerGenerateManifestTask(
@@ -89,6 +91,22 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         }
     }
 
+    private fun registerGenerateSwiftPackage(
+        project: Project
+    ) {
+        project.tasks.register(SPM_GENERATE_SWIFT_PACKAGE, GenerateSwiftPackageTask::class.java) {
+            it.doFirst { println(SPM_GENERATE_SWIFT_PACKAGE) }
+        }
+    }
+
+    private fun registerGenerateXcode(
+        project: Project
+    ) {
+        project.tasks.register(SPM_GENERATE_XCODE, GenerateXcodeProjectTask::class.java) {
+            it.doFirst { println(SPM_GENERATE_XCODE) }
+        }
+    }
+
     // FIXME: tmp
     private fun registerGraphTask(
         project: Project
@@ -115,5 +133,9 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         const val INTEROP_FRAMEWORK_TASK_NAME = "spmInteropFramework"
         const val LINK_KLIB_TASK_NAME = "spmLinkKlib"
         const val SPM_IMPORT_TASK_NAME = "spmImport"
+
+        // TODO: Tested
+        const val SPM_GENERATE_SWIFT_PACKAGE = "spmGenerateSwiftPackage"
+        const val SPM_GENERATE_XCODE = "spmGenerateXcode"
     }
 }

@@ -1,26 +1,24 @@
 package org.zoldater.kotlin.gradle.spm
 
 import org.gradle.api.Project
+import org.jetbrains.kotlin.konan.target.Family
 import java.io.File
 
-internal val Project.swiftPackageBuildDirs: SwiftPackageBuildDirs
-    get() = SwiftPackageBuildDirs(this)
-
-class SwiftPackageBuildDirs(val project: Project) {
-    private val buildDir: File = project.buildDir
+class SwiftPackageBuildDirs(
+    private val project: Project,
+    val family: Family
+) {
+    val platformName = "platform${family}"
 
     val root: File
-        get() = buildDir.resolve(DIRECTORY_SWIFT_PACKAGE)
+        get() = project.buildDir.resolve(platformName)
 
-    val framework: File
-        get() = root.resolve(DIRECTORY_FRAMEWORK)
+    val swiftPackageFile: File
+        get() = root.resolve("Package.swift")
 
-    val defs: File
-        get() = root.resolve(DIRECTORY_DEF)
+    val release: File
+        get() = root.resolve("build/Release")
 
-    companion object {
-        private const val DIRECTORY_SWIFT_PACKAGE = "swift-package-manager"
-        private const val DIRECTORY_FRAMEWORK = "framework"
-        private const val DIRECTORY_DEF = "defs"
-    }
+    val def: File
+        get() = root.resolve("def")
 }

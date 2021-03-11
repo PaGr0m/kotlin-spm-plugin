@@ -1,27 +1,47 @@
-import org.zoldater.kotlin.gradle.spm.entity.impl.ProductManager.Library.LibraryType
-
 plugins {
     java
     id("org.zoldater.kotlin.gradle.spm.plugin")
 
-//    kotlin("multiplatform") version "1.4.255-SNAPSHOT"
+    kotlin("multiplatform")
 }
 
-//kotlin {
-//    ios()
-//}
+kotlin {
+    ios()
 
-spm {
-    name = "Hello swift package manager plugin"
-
-    dependencies {
-        `package`("ExamplePackage")
+    sourceSets {
+        val commonMain by getting
     }
 
-    targets {
-        target("targetName") {
+    spm {
+        ios("11") {
+            name = "ios example"
             dependencies {
-                target("dependencyTargetName")
+                `package`(
+                    url = "https://github.com/johnsundell/files.git",
+                    version = "4.0.0",
+                    name = "Files"
+                )
+            }
+        }
+
+        macos("11") {
+            name = "tvos example"
+            dependencies {
+                `package`(
+                    url = "https://github.com/AFNetworking/AFNetworking.git",
+                    version = "4.0.0",
+                    name = "AFNetworking"
+                )
+                `package`(
+                    url = "https://github.com/Alamofire/Alamofire.git",
+                    version = "5.2.0",
+                    name = "Alamofire"
+                )
+//                `package`(
+//                    url = "https://github.com/CocoaLumberjack/CocoaLumberjack.git",
+//                    version = "3.7.0",
+//                    name = "CocoaLumberjack"
+//                )
             }
         }
     }

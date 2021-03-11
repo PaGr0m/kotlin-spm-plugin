@@ -7,73 +7,52 @@ import org.gradle.api.tasks.Nested
 import org.gradle.util.ConfigureUtil
 import org.zoldater.kotlin.gradle.spm.entity.Product
 import org.zoldater.kotlin.gradle.spm.entity.Target
-import org.zoldater.kotlin.gradle.spm.entity.impl.DependencyManager
-import org.zoldater.kotlin.gradle.spm.entity.impl.ProductManager
-import org.zoldater.kotlin.gradle.spm.entity.impl.SupportedPlatformManager
-import org.zoldater.kotlin.gradle.spm.entity.impl.TargetManager
+import org.zoldater.kotlin.gradle.spm.entity.impl.*
 import javax.inject.Inject
 
 @Suppress("UnnecessaryAbstractClass")
-abstract class KotlinSpmExtension @Inject constructor(project: Project) {
+abstract class KotlinSpmExtension @Inject constructor(private val project: Project) {
 
-    @Input
-    lateinit var name: String
-//    var name: Property<String> = project.objects.property(String::class.java)
-
-    private val platformsContainer = project.container(SupportedPlatformManager.SupportedPlatform::class.java)
-    private val productsContainer = project.container(Product::class.java)
-    private val dependenciesContainer = project.container(DependencyManager.Package::class.java)
-    private val targetsContainer = project.container(Target::class.java)
+    private val platformsManagerContainer = project.container(PlatformManager.SwiftPackageManager::class.java)
 
     @get:Nested
-    val platforms: List<SupportedPlatformManager.SupportedPlatform>
-        get() = platformsContainer.toList()
+    val platformsManager: List<PlatformManager.SwiftPackageManager>
+        get() = platformsManagerContainer.toList()
 
-    @get:Nested
-    val products: List<Product>
-        get() = productsContainer.toList()
-
-    @get:Nested
-    val dependencies: List<DependencyManager.Package>
-        get() = dependenciesContainer.toList()
-
-    @get:Nested
-    val targets: List<Target>
-        get() = targetsContainer.toList()
-
-    fun platforms(configure: SupportedPlatformManager.() -> Unit) {
-        val supportedPlatform = SupportedPlatformManager().apply(configure)
-        platformsContainer.addAll(supportedPlatform.platforms)
+    fun ios(version: String, configure: PlatformManager.PlatformIosManager.() -> Unit) {
+        val iosManager = PlatformManager.PlatformIosManager(version, project).apply(configure)
+        platformsManagerContainer.add(iosManager)
     }
 
-    fun platforms(configure: Closure<*>) = platforms {
+    fun ios(version: String, configure: Closure<*>) = ios(version) {
         ConfigureUtil.configure(configure, this)
     }
 
-    fun products(configure: ProductManager.() -> Unit) {
-        val productBlock = ProductManager().apply(configure)
-        productsContainer.addAll(productBlock.products)
+    fun tvos(version: String, configure: PlatformManager.PlatformTvosManager.() -> Unit) {
+        val tvosManager = PlatformManager.PlatformTvosManager(version, project).apply(configure)
+        platformsManagerContainer.add(tvosManager)
     }
 
-    fun products(configure: Closure<*>) = products {
+    fun tvos(version: String, configure: Closure<*>) = ios(version) {
         ConfigureUtil.configure(configure, this)
     }
 
-    fun dependencies(configure: DependencyManager.() -> Unit) {
-        val dependencyBlock = DependencyManager().apply(configure)
-        dependenciesContainer.addAll(dependencyBlock.dependencies)
+    fun macos(version: String, configure: PlatformManager.PlatformMacosManager.() -> Unit) {
+        val macosManager = PlatformManager.PlatformMacosManager(version, project).apply(configure)
+        platformsManagerContainer.add(macosManager)
     }
 
-    fun dependencies(configure: Closure<*>) = dependencies {
+    fun macos(version: String, configure: Closure<*>) = ios(version) {
         ConfigureUtil.configure(configure, this)
     }
 
-    fun targets(configure: TargetManager.() -> Unit) {
-        val targetBlock = TargetManager().apply(configure)
-        targetsContainer.addAll(targetBlock.targets)
+    fun watchos(version: String, configure: PlatformManager.PlatformWatchosManager.() -> Unit) {
+        val watchosManager = PlatformManager.PlatformWatchosManager(version, project).apply(configure)
+        platformsManagerContainer.add(watchosManager)
     }
 
-    fun targets(configure: Closure<*>) = targets {
+    fun watchos(version: String, configure: Closure<*>) = ios(version) {
         ConfigureUtil.configure(configure, this)
     }
+
 }

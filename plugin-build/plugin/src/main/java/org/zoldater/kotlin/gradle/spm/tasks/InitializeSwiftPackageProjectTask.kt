@@ -2,6 +2,7 @@ package org.zoldater.kotlin.gradle.spm.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.TaskAction
 import org.zoldater.kotlin.gradle.spm.SwiftPackageBuildDirs
 import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand
@@ -18,10 +19,6 @@ abstract class InitializeSwiftPackageProjectTask : DefaultTask() {
 
     @Input
     lateinit var buildDirs: List<SwiftPackageBuildDirs>
-
-//    @get:OutputDirectories
-//    val swiftPackageFile: List<SwiftPackageBuildDirs>
-//        get() = buildDirs
 
     @TaskAction
     fun action() {

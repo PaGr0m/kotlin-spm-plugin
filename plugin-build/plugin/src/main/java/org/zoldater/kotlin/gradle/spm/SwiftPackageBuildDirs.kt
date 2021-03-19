@@ -8,10 +8,8 @@ class SwiftPackageBuildDirs(
     private val project: Project,
     val family: Family
 ) {
-    val platformName = "platform${family}"
-
     val root: File
-        get() = project.buildDir.resolve(platformName)
+        get() = project.buildDir.resolve("swiftPackageManager").resolve(family.name)
 
     val swiftPackageFile: File
         get() = root.resolve("Package.swift")

@@ -5,17 +5,31 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.util.ConfigureUtil
+import org.jetbrains.kotlin.konan.target.Family
 import org.zoldater.kotlin.gradle.spm.entity.Product
 import org.zoldater.kotlin.gradle.spm.entity.Target
 import javax.inject.Inject
 
 class PlatformManager {
-    class PlatformIosManager(val platformVersion: String, project: Project) : SwiftPackageManager(project)
-    class PlatformTvosManager(val platformVersion: String, project: Project) : SwiftPackageManager(project)
-    class PlatformMacosManager(val platformVersion: String, project: Project) : SwiftPackageManager(project)
-    class PlatformWatchosManager(val platformVersion: String, project: Project) : SwiftPackageManager(project)
+    class PlatformIosManager(val platformVersion: String, project: Project) : SwiftPackageManager(project) {
+        override val family: Family get() = Family.IOS
+    }
+
+    class PlatformMacosManager(val platformVersion: String, project: Project) : SwiftPackageManager(project) {
+        override val family: Family get() = Family.OSX
+    }
+
+    class PlatformTvosManager(val platformVersion: String, project: Project) : SwiftPackageManager(project) {
+        override val family: Family get() = Family.TVOS
+    }
+
+    class PlatformWatchosManager(val platformVersion: String, project: Project) : SwiftPackageManager(project) {
+        override val family: Family get() = Family.WATCHOS
+    }
 
     abstract class SwiftPackageManager @Inject constructor(project: Project) {
+        abstract val family: Family
+
         @Input
         lateinit var name: String
 

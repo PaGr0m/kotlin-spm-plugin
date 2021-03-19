@@ -25,7 +25,7 @@ abstract class GenerateDefFileTask : DefaultTask() {
         // Take all *.framework files without PROJECT_NAME.framework
         val headers = swiftPackageBuildDirs.release
             .listFiles { _, filename -> filename.endsWith(".framework") }
-            .filterNot { it.name.startsWith(swiftPackageBuildDirs.platformName) }
+            .filterNot { it.name.startsWith(swiftPackageBuildDirs.family.name) }
             .map { it.resolve("Headers") }
             .flatMap { it.listFiles().toList() }
 

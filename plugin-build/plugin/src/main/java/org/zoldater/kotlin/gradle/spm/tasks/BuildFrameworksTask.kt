@@ -21,6 +21,6 @@ abstract class BuildFrameworksTask : DefaultTask() {
 
     @TaskAction
     fun action() {
-        buildDirs.forEach { SwiftPackageCLICommand.generateFrameworks(it.root, it.platformName) }
+        buildDirs.forEach { SwiftPackageCLICommand.generateFrameworks(it.root, it.family.name) }
     }
 }

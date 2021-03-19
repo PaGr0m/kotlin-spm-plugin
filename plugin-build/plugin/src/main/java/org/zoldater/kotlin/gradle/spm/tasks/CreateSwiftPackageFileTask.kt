@@ -18,10 +18,7 @@ abstract class CreateSwiftPackageFileTask : DefaultTask() {
     lateinit var buildDirs: List<SwiftPackageBuildDirs>
 
     @Input
-    lateinit var platformVersion: Map<Family, String>
-
-    @Input
-    lateinit var dependencies: Map<Family, List<DependencyManager.Package>>
+    lateinit var dependencies: Map<Family, Pair<String, List<DependencyManager.Package>>>
 
     @TaskAction
     fun action() {
@@ -32,18 +29,20 @@ abstract class CreateSwiftPackageFileTask : DefaultTask() {
         val fileContent = this::class.java.getResource("/Package.swift").readText()
 
         val platformFamily = swiftPackageBuildDirs.family
-        val platformArea = "${platformFamily.platformToPackageTemplate()}(\"${platformVersion[platformFamily]}\")"
+        val platformArea = "${platformFamily.platformToPackageTemplate()}(\"${dependencies[platformFamily]?.first}\")"
 
         val dependencyArea = dependencies[platformFamily]
+            ?.second
             ?.joinToString(", ") { it.convertToPackageContent() }
             ?: throw Exception("Unable to create Package.swift file")
 
         val targetDependencyArea = dependencies[platformFamily]
+            ?.second
             ?.joinToString(", ") { "\"${it.dependencyName}\"" }
             ?: throw Exception("Unable to create Package.swift file")
 
         swiftPackageBuildDirs.swiftPackageFile.writeText(fileContent
-            .replace("\$PLATFORM_NAME", swiftPackageBuildDirs.platformName)
+            .replace("\$PLATFORM_NAME", swiftPackageBuildDirs.family.name)
             .replace("\$PLATFORM_TYPE", platformArea)
             .replace("\$DEPENDENCIES", dependencyArea)
             .replace("\$TARGET_DEPENDENCY", targetDependencyArea)

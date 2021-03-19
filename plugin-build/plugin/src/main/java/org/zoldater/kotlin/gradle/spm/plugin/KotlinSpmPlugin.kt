@@ -4,7 +4,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.konan.target.Family
 import org.zoldater.kotlin.gradle.spm.SwiftPackageBuildDirs
-import org.zoldater.kotlin.gradle.spm.entity.impl.DependencyManager
 import org.zoldater.kotlin.gradle.spm.entity.impl.PlatformManager
 import org.zoldater.kotlin.gradle.spm.tasks.*
 
@@ -23,9 +22,9 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             // Graph task registration (order should not be changed)
             registerInitializeSwiftPackageProjectTask(project, spmExtension)
             registerCreateSwiftPackageFileTask(project, spmExtension)
-            registerGenerateXcodeTask(project, spmExtension)
-            registerGenerateFrameworksTask(project, spmExtension)
-            registerGenerateDefFileTask(project, spmExtension)
+            registerGenerateXcodeTask(project)
+            registerBuildFrameworksTask(project)
+            registerGenerateDefFileTask(project)
         }
     }
 
@@ -37,7 +36,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME,
             CleanSwiftPackageProjectTask::class.java
         ) { task ->
-            task.buildDirs = getPlatformBuildDirs(project, spmExtension)
+            task.buildDirs = spmExtension.platformsManager.map { SwiftPackageBuildDirs(project, it.family) }
         }
     }
 
@@ -49,7 +48,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME,
             InitializeSwiftPackageProjectTask::class.java
         ) { task ->
-            task.buildDirs = getPlatformBuildDirs(project, spmExtension)
+            task.buildDirs = spmExtension.platformsManager.map { SwiftPackageBuildDirs(project, it.family) }
         }
     }
 
@@ -66,42 +65,30 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             CREATE_PACKAGE_SWIFT_FILE_TASK_NAME,
             CreateSwiftPackageFileTask::class.java
         ) { task ->
-            val platformVersions = mutableMapOf<Family, String>()
-            val platformDependencies = mutableMapOf<Family, List<DependencyManager.Package>>()
-
-            spmExtension.platformsManager.map { platform ->
+            task.dependencies = spmExtension.platformsManager.map { platform ->
                 when (platform) {
                     is PlatformManager.PlatformIosManager -> {
-                        platformVersions[Family.IOS] = platform.platformVersion
-                        platformDependencies[Family.IOS] = platform.dependencies
+                        Family.IOS to Pair(platform.platformVersion, platform.dependencies)
                     }
                     is PlatformManager.PlatformTvosManager -> {
-                        platformVersions[Family.TVOS] = platform.platformVersion
-                        platformDependencies[Family.TVOS] = platform.dependencies
+                        Family.TVOS to Pair(platform.platformVersion, platform.dependencies)
                     }
                     is PlatformManager.PlatformMacosManager -> {
-                        platformVersions[Family.OSX] = platform.platformVersion
-                        platformDependencies[Family.OSX] = platform.dependencies
+                        Family.OSX to Pair(platform.platformVersion, platform.dependencies)
                     }
                     is PlatformManager.PlatformWatchosManager -> {
-                        platformVersions[Family.WATCHOS] = platform.platformVersion
-                        platformDependencies[Family.WATCHOS] = platform.dependencies
+                        Family.WATCHOS to Pair(platform.platformVersion, platform.dependencies)
                     }
                     else -> throw Exception("Create Package.swift task error") // TODO: rework
                 }
-            }
+            }.toMap()
 
-            task.platformVersion = platformVersions
-            task.dependencies = platformDependencies
-            task.buildDirs = getPlatformBuildDirs(project, spmExtension)
+            task.buildDirs = initializeSwiftPackageProjectTask.get().buildDirs
             task.dependsOn(initializeSwiftPackageProjectTask)
         }
     }
 
-    private fun registerGenerateXcodeTask(
-        project: Project,
-        spmExtension: KotlinSpmExtension,
-    ) {
+    private fun registerGenerateXcodeTask(project: Project) {
         val createSwiftPackageFileTask = project.tasks.named(
             CREATE_PACKAGE_SWIFT_FILE_TASK_NAME,
             CreateSwiftPackageFileTask::class.java
@@ -111,15 +98,12 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             GENERATE_XCODE_TASK_NAME,
             GenerateXcodeTask::class.java
         ) { task ->
-            task.buildDirs = getPlatformBuildDirs(project, spmExtension)
+            task.buildDirs = createSwiftPackageFileTask.get().buildDirs
             task.dependsOn(createSwiftPackageFileTask)
         }
     }
 
-    private fun registerGenerateFrameworksTask(
-        project: Project,
-        spmExtension: KotlinSpmExtension,
-    ) {
+    private fun registerBuildFrameworksTask(project: Project) {
         val generateXcodeTask = project.tasks.named(
             GENERATE_XCODE_TASK_NAME,
             GenerateXcodeTask::class.java
@@ -129,15 +113,12 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             BUILD_FRAMEWORK_TASK_NAME,
             BuildFrameworksTask::class.java
         ) { task ->
-            task.buildDirs = getPlatformBuildDirs(project, spmExtension)
+            task.buildDirs = generateXcodeTask.get().buildDirs
             task.dependsOn(generateXcodeTask)
         }
     }
 
-    private fun registerGenerateDefFileTask(
-        project: Project,
-        spmExtension: KotlinSpmExtension,
-    ) {
+    private fun registerGenerateDefFileTask(project: Project) {
         val buildFrameworksTask = project.tasks.named(
             BUILD_FRAMEWORK_TASK_NAME,
             BuildFrameworksTask::class.java
@@ -147,24 +128,9 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             GENERATE_DEF_FILE_TASK_NAME,
             GenerateDefFileTask::class.java
         ) { task ->
-            task.buildDirs = getPlatformBuildDirs(project, spmExtension)
+            task.buildDirs = buildFrameworksTask.get().buildDirs
             task.dependsOn(buildFrameworksTask)
         }
-    }
-
-    private fun getPlatformBuildDirs(
-        project: Project,
-        spmExtension: KotlinSpmExtension,
-    ): List<SwiftPackageBuildDirs> {
-        return spmExtension.platformsManager.map { platform ->
-            when (platform) {
-                is PlatformManager.PlatformIosManager -> Family.IOS
-                is PlatformManager.PlatformTvosManager -> Family.TVOS
-                is PlatformManager.PlatformMacosManager -> Family.OSX
-                is PlatformManager.PlatformWatchosManager -> Family.WATCHOS
-                else -> throw Exception("TODO") // TODO
-            }
-        }.map { SwiftPackageBuildDirs(project, it) }
     }
 
     companion object {

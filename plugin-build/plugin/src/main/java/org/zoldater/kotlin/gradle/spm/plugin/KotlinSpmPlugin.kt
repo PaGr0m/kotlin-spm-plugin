@@ -8,8 +8,6 @@ import org.zoldater.kotlin.gradle.spm.entity.impl.PlatformManager
 import org.zoldater.kotlin.gradle.spm.tasks.*
 
 abstract class KotlinSpmPlugin : Plugin<Project> {
-    // FIXME: вынести buildDirs в отдельную сущность
-
     override fun apply(project: Project) = with(project) {
         pluginManager.withPlugin(MULTIPLATFORM_EXTENSION_NAME) {
             val spmExtension = project.extensions.create(

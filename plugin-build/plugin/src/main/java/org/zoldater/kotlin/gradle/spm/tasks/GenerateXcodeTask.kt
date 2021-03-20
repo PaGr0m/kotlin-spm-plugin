@@ -1,19 +1,23 @@
 package org.zoldater.kotlin.gradle.spm.tasks
 
-import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
 import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand
+import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand.Companion.toCommand
 import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
 import java.io.File
 
-abstract class GenerateXcodeTask : DefaultTask() {
+
+abstract class GenerateXcodeTask : Exec() {
     init {
         /**
          * Task like a command: `swift package generate-xcodeproj`
          */
         description = "Generate Xcode project"
         group = KotlinSpmPlugin.TASK_GROUP
+
+        commandLine("echo", "todo: remove") // FIXME: ???
     }
 
     @Nested
@@ -21,6 +25,10 @@ abstract class GenerateXcodeTask : DefaultTask() {
 
     @TaskAction
     fun action() {
-        platformRootDirectories.forEach { SwiftPackageCLICommand.generateXcodeProject(it) }
+        platformRootDirectories.forEach {
+            workingDir = it
+            commandLine(*SwiftPackageCLICommand.GENERATE_XCODE_PROJECT.toCommand())
+            exec()
+        }
     }
 }

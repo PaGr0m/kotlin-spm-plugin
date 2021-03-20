@@ -1,19 +1,22 @@
 package org.zoldater.kotlin.gradle.spm.tasks
 
-import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
 import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand
+import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand.Companion.toCommand
 import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
 import java.io.File
 
-abstract class BuildFrameworksTask : DefaultTask() {
+abstract class BuildFrameworksTask : Exec() {
     init {
         /**
          * Task like a command: `xcodebuild build --target ${TARGET_NAME}`
          */
         description = "Build the target in the build root"
         group = KotlinSpmPlugin.TASK_GROUP
+
+        commandLine("echo", "todo: remove") // FIXME: ???
     }
 
     @Nested
@@ -21,6 +24,13 @@ abstract class BuildFrameworksTask : DefaultTask() {
 
     @TaskAction
     fun action() {
-        platformRootDirectories.forEach { SwiftPackageCLICommand.generateFrameworks(it, it.nameWithoutExtension) }
+        platformRootDirectories.forEach {
+            workingDir = it
+            commandLine(
+                *SwiftPackageCLICommand.BUILD_XCODE_PROJECT.toCommand(),
+                "-target", it.nameWithoutExtension
+            )
+            exec()
+        }
     }
 }

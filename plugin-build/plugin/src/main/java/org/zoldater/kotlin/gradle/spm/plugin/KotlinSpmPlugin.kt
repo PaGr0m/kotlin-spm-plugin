@@ -75,7 +75,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             GENERATE_XCODE_TASK_NAME,
             GenerateXcodeTask::class.java
         ) { task ->
-            task.buildDirs = listOf()
+            task.platformRootDirectories = createSwiftPackageFileTask.get().platformRootDirectories
             task.dependsOn(createSwiftPackageFileTask)
         }
     }
@@ -90,7 +90,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             BUILD_FRAMEWORK_TASK_NAME,
             BuildFrameworksTask::class.java
         ) { task ->
-            task.buildDirs = generateXcodeTask.get().buildDirs
+            task.platformRootDirectories = generateXcodeTask.get().platformRootDirectories
             task.dependsOn(generateXcodeTask)
         }
     }
@@ -101,13 +101,13 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             BuildFrameworksTask::class.java
         )
 
-        project.tasks.register(
-            GENERATE_DEF_FILE_TASK_NAME,
-            GenerateDefFileTask::class.java
-        ) { task ->
-            task.buildDirs = buildFrameworksTask.get().buildDirs
-            task.dependsOn(buildFrameworksTask)
-        }
+//        project.tasks.register(
+//            GENERATE_DEF_FILE_TASK_NAME,
+//            GenerateDefFileTask::class.java
+//        ) { task ->
+//            task.buildDirs = buildFrameworksTask.get().buildDirs
+//            task.dependsOn(buildFrameworksTask)
+//        }
     }
 
     data class PlatformDependency(

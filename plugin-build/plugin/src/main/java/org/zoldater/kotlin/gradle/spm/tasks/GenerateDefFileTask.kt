@@ -1,11 +1,10 @@
 package org.zoldater.kotlin.gradle.spm.tasks
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
-import org.zoldater.kotlin.gradle.spm.SwiftPackageBuildDirs
-import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand
 import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
+import java.io.File
 
 abstract class GenerateDefFileTask : DefaultTask() {
     init {
@@ -13,32 +12,39 @@ abstract class GenerateDefFileTask : DefaultTask() {
         group = KotlinSpmPlugin.TASK_GROUP
     }
 
-    @Input
-    lateinit var buildDirs: List<SwiftPackageBuildDirs>
+    @Nested
+    lateinit var platformRootDirectories: List<File>
 
     @TaskAction
     fun action() {
-        buildDirs.map { generateDefFile(it) }
+        platformRootDirectories.map { generateDefFile(it) }
     }
 
-    private fun generateDefFile(swiftPackageBuildDirs: SwiftPackageBuildDirs) {
-        // Take all *.framework files without PROJECT_NAME.framework
-        val headers = swiftPackageBuildDirs.release
-            .listFiles { _, filename -> filename.endsWith(".framework") }
-            .filterNot { it.name.startsWith(swiftPackageBuildDirs.family.name) }
+    private fun generateDefFile(platformDir: File) {
+        // Collect all *.framework files without PROJECT_NAME.framework
+        val headers = platformDir.resolve("build").resolve("Release")
+            .walkTopDown()
+            .filter { it.extension == "framework" && it.nameWithoutExtension != platformDir.name }
             .map { it.resolve("Headers") }
-            .flatMap { it.listFiles().toList() }
+            .flatMap { it.walkTopDown() }
+            .filter { it.extension == HEADER_FILE_EXTENSION }
 
-        val defDir = swiftPackageBuildDirs.def
+        // Create .def file with directory
+        val defDir = platformDir.resolve(DEF_FILE_EXTENSION)
         defDir.mkdirs()
 
-        val simpleDef = defDir.resolve("simple.def")
-        simpleDef.createNewFile()
-        simpleDef.writeText(
+        val defFile = defDir.resolve("${platformDir.name}.${DEF_FILE_EXTENSION}")
+        defFile.createNewFile()
+        defFile.writeText(
             """
             language = Objective-C
             headers = ${headers.joinToString(" ")}
             """.trimIndent()
         )
+    }
+
+    companion object {
+        private const val HEADER_FILE_EXTENSION = "h"
+        private const val DEF_FILE_EXTENSION = "def"
     }
 }

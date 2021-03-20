@@ -27,7 +27,7 @@ abstract class CreateSwiftPackageFileTask : DefaultTask() {
     }
 
     private fun fillSwiftPackageTemplate(platformDir: File) {
-        val family = platformDir.nameWithoutExtension.toFamily()
+        val family = platformDir.name.toFamily()
 
         val platformArea = "${family.toPlatformSwiftPackageTemplate()}(\"${dependencies[family]?.version}\")"
         val dependencyArea = dependencies[family]

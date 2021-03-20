@@ -28,7 +28,7 @@ abstract class BuildFrameworksTask : Exec() {
             workingDir = it
             commandLine(
                 *SwiftPackageCLICommand.BUILD_XCODE_PROJECT.toCommand(),
-                "-target", it.nameWithoutExtension
+                "-target", it.name
             )
             exec()
         }

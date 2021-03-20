@@ -99,13 +99,13 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             BuildFrameworksTask::class.java
         )
 
-//        project.tasks.register(
-//            GENERATE_DEF_FILE_TASK_NAME,
-//            GenerateDefFileTask::class.java
-//        ) { task ->
-//            task.buildDirs = buildFrameworksTask.get().buildDirs
-//            task.dependsOn(buildFrameworksTask)
-//        }
+        project.tasks.register(
+            GENERATE_DEF_FILE_TASK_NAME,
+            GenerateDefFileTask::class.java
+        ) { task ->
+            task.platformRootDirectories = buildFrameworksTask.get().platformRootDirectories
+            task.dependsOn(buildFrameworksTask)
+        }
     }
 
     data class PlatformDependency(

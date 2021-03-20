@@ -1,12 +1,13 @@
 package org.zoldater.kotlin.gradle.spm.tasks
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.OutputFiles
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
+import org.jetbrains.kotlin.konan.target.Family
 import org.zoldater.kotlin.gradle.spm.SwiftPackageBuildDirs
 import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand
 import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
+import org.zoldater.kotlin.gradle.spm.swiftPackageBuildDirs
+import java.io.File
 
 abstract class InitializeSwiftPackageProjectTask : DefaultTask() {
     init {
@@ -17,13 +18,17 @@ abstract class InitializeSwiftPackageProjectTask : DefaultTask() {
         group = KotlinSpmPlugin.TASK_GROUP
     }
 
-    @Input
-    lateinit var buildDirs: List<SwiftPackageBuildDirs>
+    @Nested
+    lateinit var platformFamilies: List<Family>
+
+    @get:OutputDirectories
+    val platformRootDirectories: List<File>
+        get() = platformFamilies.map { project.swiftPackageBuildDirs.pathToPlatformRoot(it) }
 
     @TaskAction
     fun action() {
-        buildDirs
-            .map { it.root }
+        platformFamilies
+            .map { project.swiftPackageBuildDirs.pathToPlatformRoot(it) }
             .onEach { it.mkdirs() }
             .forEach { SwiftPackageCLICommand.initializeProject(it) }
     }

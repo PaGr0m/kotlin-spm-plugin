@@ -3,7 +3,7 @@ package org.zoldater.kotlin.gradle.spm.plugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.konan.target.Family
-import org.zoldater.kotlin.gradle.spm.SwiftPackageBuildDirs
+import org.zoldater.kotlin.gradle.spm.entity.impl.DependencyManager
 import org.zoldater.kotlin.gradle.spm.entity.impl.PlatformManager
 import org.zoldater.kotlin.gradle.spm.tasks.*
 
@@ -17,7 +17,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
                 KotlinSpmExtension::class.java, project
             )
 
-            registerSpmCleanTask(project, spmExtension)
+            registerSpmCleanTask(project)
 
             // Graph task registration (order should not be changed)
             registerInitializeSwiftPackageProjectTask(project, spmExtension)
@@ -28,16 +28,8 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         }
     }
 
-    private fun registerSpmCleanTask(
-        project: Project,
-        spmExtension: KotlinSpmExtension,
-    ) {
-        project.tasks.register(
-            CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME,
-            CleanSwiftPackageProjectTask::class.java
-        ) { task ->
-            task.buildDirs = spmExtension.platformsManager.map { SwiftPackageBuildDirs(project, it.family) }
-        }
+    private fun registerSpmCleanTask(project: Project) {
+        project.tasks.register(CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME, CleanSwiftPackageProjectTask::class.java)
     }
 
     private fun registerInitializeSwiftPackageProjectTask(
@@ -48,7 +40,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME,
             InitializeSwiftPackageProjectTask::class.java
         ) { task ->
-            task.buildDirs = spmExtension.platformsManager.map { SwiftPackageBuildDirs(project, it.family) }
+            task.platformFamilies = spmExtension.platformsManager.map { it.family }
         }
     }
 
@@ -65,25 +57,10 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             CREATE_PACKAGE_SWIFT_FILE_TASK_NAME,
             CreateSwiftPackageFileTask::class.java
         ) { task ->
-            task.dependencies = spmExtension.platformsManager.map { platform ->
-                when (platform) {
-                    is PlatformManager.PlatformIosManager -> {
-                        Family.IOS to Pair(platform.platformVersion, platform.dependencies)
-                    }
-                    is PlatformManager.PlatformTvosManager -> {
-                        Family.TVOS to Pair(platform.platformVersion, platform.dependencies)
-                    }
-                    is PlatformManager.PlatformMacosManager -> {
-                        Family.OSX to Pair(platform.platformVersion, platform.dependencies)
-                    }
-                    is PlatformManager.PlatformWatchosManager -> {
-                        Family.WATCHOS to Pair(platform.platformVersion, platform.dependencies)
-                    }
-                    else -> throw Exception("Create Package.swift task error") // TODO: rework
-                }
-            }.toMap()
-
-            task.buildDirs = initializeSwiftPackageProjectTask.get().buildDirs
+            task.dependencies = spmExtension.platformsManager
+                .map { PlatformDependency.create(it) }
+                .toMap()
+            task.platformRootDirectories = initializeSwiftPackageProjectTask.get().platformRootDirectories
             task.dependsOn(initializeSwiftPackageProjectTask)
         }
     }
@@ -98,7 +75,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             GENERATE_XCODE_TASK_NAME,
             GenerateXcodeTask::class.java
         ) { task ->
-            task.buildDirs = createSwiftPackageFileTask.get().buildDirs
+            task.buildDirs = listOf()
             task.dependsOn(createSwiftPackageFileTask)
         }
     }
@@ -130,6 +107,31 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         ) { task ->
             task.buildDirs = buildFrameworksTask.get().buildDirs
             task.dependsOn(buildFrameworksTask)
+        }
+    }
+
+    data class PlatformDependency(
+        val version: String,
+        val dependencies: List<DependencyManager.Package>,
+    ) {
+        companion object {
+            fun create(platform: PlatformManager.SwiftPackageManager): Pair<Family, PlatformDependency> {
+                return when (platform) {
+                    is PlatformManager.PlatformIosManager -> {
+                        Family.IOS to PlatformDependency(platform.platformVersion, platform.dependencies)
+                    }
+                    is PlatformManager.PlatformTvosManager -> {
+                        Family.TVOS to PlatformDependency(platform.platformVersion, platform.dependencies)
+                    }
+                    is PlatformManager.PlatformMacosManager -> {
+                        Family.OSX to PlatformDependency(platform.platformVersion, platform.dependencies)
+                    }
+                    is PlatformManager.PlatformWatchosManager -> {
+                        Family.WATCHOS to PlatformDependency(platform.platformVersion, platform.dependencies)
+                    }
+                    else -> throw Exception("Create Package.swift task error") // TODO: rework
+                }
+            }
         }
     }
 

@@ -1,12 +1,11 @@
 package org.zoldater.kotlin.gradle.spm.tasks
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.konan.target.Family
-import org.zoldater.kotlin.gradle.spm.SwiftPackageBuildDirs
-import org.zoldater.kotlin.gradle.spm.entity.impl.DependencyManager
 import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
+import java.io.File
 
 abstract class CreateSwiftPackageFileTask : DefaultTask() {
     init {
@@ -14,46 +13,54 @@ abstract class CreateSwiftPackageFileTask : DefaultTask() {
         group = KotlinSpmPlugin.TASK_GROUP
     }
 
-    @Input
-    lateinit var buildDirs: List<SwiftPackageBuildDirs>
+    private val swiftPackageTemplateContent = this::class.java.getResource("/Package.swift").readText()
 
-    @Input
-    lateinit var dependencies: Map<Family, Pair<String, List<DependencyManager.Package>>>
+    @Nested
+    lateinit var dependencies: Map<Family, KotlinSpmPlugin.PlatformDependency>
+
+    @Nested
+    lateinit var platformRootDirectories: List<File>
 
     @TaskAction
     fun action() {
-        buildDirs.forEach { fillSwiftPackageTemplate(it) }
+        platformRootDirectories.forEach { fillSwiftPackageTemplate(it) }
     }
 
-    private fun fillSwiftPackageTemplate(swiftPackageBuildDirs: SwiftPackageBuildDirs) {
-        val fileContent = this::class.java.getResource("/Package.swift").readText()
+    private fun fillSwiftPackageTemplate(platformDir: File) {
+        val family = platformDir.nameWithoutExtension.toFamily()
 
-        val platformFamily = swiftPackageBuildDirs.family
-        val platformArea = "${platformFamily.platformToPackageTemplate()}(\"${dependencies[platformFamily]?.first}\")"
-
-        val dependencyArea = dependencies[platformFamily]
-            ?.second
+        val platformArea = "${family.toPlatformSwiftPackageTemplate()}(\"${dependencies[family]?.version}\")"
+        val dependencyArea = dependencies[family]
+            ?.dependencies
             ?.joinToString(", ") { it.convertToPackageContent() }
-            ?: throw Exception("Unable to create Package.swift file")
+            ?: throw IllegalArgumentException("Unable to create Package.swift file")
 
-        val targetDependencyArea = dependencies[platformFamily]
-            ?.second
+        val targetDependencyArea = dependencies[family]
+            ?.dependencies
             ?.joinToString(", ") { "\"${it.dependencyName}\"" }
-            ?: throw Exception("Unable to create Package.swift file")
+            ?: throw IllegalArgumentException("Unable to create Package.swift file")
 
-        swiftPackageBuildDirs.swiftPackageFile.writeText(fileContent
-            .replace("\$PLATFORM_NAME", swiftPackageBuildDirs.family.name)
+        platformDir.resolve("Package.swift").writeText(swiftPackageTemplateContent
+            .replace("\$PLATFORM_NAME", family.name)
             .replace("\$PLATFORM_TYPE", platformArea)
             .replace("\$DEPENDENCIES", dependencyArea)
             .replace("\$TARGET_DEPENDENCY", targetDependencyArea)
         )
     }
 
-    private fun Family.platformToPackageTemplate(): String = when (this) {
+    private fun Family.toPlatformSwiftPackageTemplate(): String = when (this) {
         Family.IOS -> ".iOS"
         Family.OSX -> ".macOS"
         Family.TVOS -> ".tvOS"
         Family.WATCHOS -> ".watchOS"
-        else -> throw Exception("Apple family platform not found")
+        else -> throw IllegalArgumentException("Apple family platform not found")
+    }
+
+    private fun String.toFamily(): Family = when (this) {
+        "IOS" -> Family.IOS
+        "OSX" -> Family.OSX
+        "TVOS" -> Family.TVOS
+        "WATCHOS" -> Family.WATCHOS
+        else -> throw IllegalArgumentException("Apple platform not found")
     }
 }

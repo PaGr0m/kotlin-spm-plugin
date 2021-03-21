@@ -28,7 +28,10 @@ abstract class BuildFrameworksTask : Exec() {
             workingDir = it
             commandLine(
                 *SwiftPackageCLICommand.BUILD_XCODE_PROJECT.toCommand(),
-                "-target", it.name
+                "-project", "${it.name}.xcodeproj",
+                "-target", it.name,
+                "-configuration", "Release",
+                "-quiet"
             )
             exec()
         }

@@ -2,6 +2,7 @@ package org.zoldater.kotlin.gradle.spm.tasks
 
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Nested
+import org.gradle.api.tasks.OutputDirectories
 import org.gradle.api.tasks.TaskAction
 import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand
 import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand.Companion.toCommand
@@ -21,6 +22,10 @@ abstract class BuildFrameworksTask : Exec() {
 
     @Nested
     lateinit var platformRootDirectories: List<File>
+
+    @get:OutputDirectories
+    val platformBuildDirectories: List<File>
+        get() = platformRootDirectories.map { it.resolve("build") }
 
     @TaskAction
     fun action() {

@@ -33,6 +33,7 @@ abstract class InitializeSwiftPackageProjectTask : Exec() {
     fun action() {
         platformFamilies
             .map { project.swiftPackageBuildDirs.pathToPlatformRoot(it) }
+            .filterNot { it.exists() }
             .onEach { it.mkdirs() }
             .forEach {
                 workingDir = it

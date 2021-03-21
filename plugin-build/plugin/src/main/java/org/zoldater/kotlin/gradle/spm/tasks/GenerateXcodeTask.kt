@@ -1,8 +1,6 @@
 package org.zoldater.kotlin.gradle.spm.tasks
 
-import org.gradle.api.tasks.Exec
-import org.gradle.api.tasks.Nested
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand
 import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand.Companion.toCommand
 import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
@@ -22,6 +20,10 @@ abstract class GenerateXcodeTask : Exec() {
 
     @Nested
     lateinit var platformRootDirectories: List<File>
+
+    @get:OutputDirectories
+    val platformXcodeProjects: List<File>
+        get() = platformRootDirectories.map { it.resolve("${it.name}.xcodeproj") }
 
     @TaskAction
     fun action() {

@@ -2,9 +2,12 @@ package org.zoldater.kotlin.gradle.spm.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Nested
+import org.gradle.api.tasks.OutputDirectories
+import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.konan.target.Family
 import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
+import org.zoldater.kotlin.gradle.spm.swiftPackageBuildDirs
 import java.io.File
 
 abstract class CreateSwiftPackageFileTask : DefaultTask() {
@@ -20,6 +23,10 @@ abstract class CreateSwiftPackageFileTask : DefaultTask() {
 
     @Nested
     lateinit var platformRootDirectories: List<File>
+
+    @get:OutputFiles
+    val platformSwiftPackages: List<File>
+        get() = platformRootDirectories.map { it.resolve("Package.swift") }
 
     @TaskAction
     fun action() {

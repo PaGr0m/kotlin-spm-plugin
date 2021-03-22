@@ -1,10 +1,14 @@
 package org.zoldater.kotlin.gradle.spm.tasks
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Nested
-import org.gradle.api.tasks.OutputDirectories
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.jetbrains.kotlin.konan.target.Family
 import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
+import org.zoldater.kotlin.gradle.spm.swiftPackageBuildDirs
 import java.io.File
 
 abstract class GenerateDefFileTask : DefaultTask() {
@@ -14,42 +18,44 @@ abstract class GenerateDefFileTask : DefaultTask() {
     }
 
     @Nested
-    lateinit var platformRootDirectories: List<File>
+    val platformFamily: Property<Family> = project.objects.property(Family::class.java)
 
-    @get:OutputDirectories
-    val platformDefDirectories: List<File>
-        get() = platformRootDirectories.map { it.resolve("def") }
+    @Nested
+    val platformDependency: Property<String> = project.objects.property(String::class.java)
+
+    @get:OutputFile
+    val outputDefFile: Provider<File>
+        get() = platformFamily.map {
+            project.swiftPackageBuildDirs.defsDir(it).resolve("${platformDependency.get()}.def")
+        }
 
     @TaskAction
     fun action() {
-        platformRootDirectories.map { generateDefFile(it) }
-    }
+        val family = platformFamily.get()
+        val frameworkName = platformDependency.get()
 
-    private fun generateDefFile(platformDir: File) {
-        // Collect all *.framework files without PROJECT_NAME.framework
-        val headers = platformDir.resolve("build").resolve("Release")
+        val frameworkDir = project.swiftPackageBuildDirs
+            .releaseDir(family)
+            .resolve("$frameworkName.framework")
+
+        val headers = frameworkDir
+            .resolve("Headers")
             .walkTopDown()
-            .filter { it.extension == "framework" && it.nameWithoutExtension != platformDir.name }
-            .map { it.resolve("Headers") }
-            .flatMap { it.walkTopDown() }
-            .filter { it.extension == HEADER_FILE_EXTENSION }
+            .filter { it.extension == "h" }
 
-        // Create .def file with directory
-        val defDir = platformDir.resolve(DEF_FILE_EXTENSION)
-        defDir.mkdirs()
+        val defsDir = project.swiftPackageBuildDirs.defsDir(family)
+        if (!defsDir.exists()) {
+            defsDir.mkdirs()
+        }
 
-        val defFile = defDir.resolve("${platformDir.name}.${DEF_FILE_EXTENSION}")
+        val defFile = defsDir.resolve("$frameworkName.def")
         defFile.createNewFile()
         defFile.writeText(
             """
             language = Objective-C
+            modules = $frameworkName
             headers = ${headers.joinToString(" ")}
             """.trimIndent()
         )
-    }
-
-    companion object {
-        private const val HEADER_FILE_EXTENSION = "h"
-        private const val DEF_FILE_EXTENSION = "def"
     }
 }

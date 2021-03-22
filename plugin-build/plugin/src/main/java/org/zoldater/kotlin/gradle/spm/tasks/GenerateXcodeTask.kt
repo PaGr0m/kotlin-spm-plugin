@@ -1,11 +1,15 @@
 package org.zoldater.kotlin.gradle.spm.tasks
 
-import org.gradle.api.tasks.*
-import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand
-import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand.Companion.toCommand
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.Nested
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFile
+import org.jetbrains.kotlin.konan.target.Family
 import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
+import org.zoldater.kotlin.gradle.spm.swiftPackageBuildDirs
 import java.io.File
-
 
 abstract class GenerateXcodeTask : Exec() {
     init {
@@ -14,23 +18,27 @@ abstract class GenerateXcodeTask : Exec() {
          */
         description = "Generate Xcode project"
         group = KotlinSpmPlugin.TASK_GROUP
-
-        commandLine("echo", "todo: remove") // FIXME: ???
     }
 
     @Nested
-    lateinit var platformRootDirectories: List<File>
+    val platformFamily: Property<Family> = project.objects.property(Family::class.java)
 
-    @get:OutputDirectories
-    val platformXcodeProjects: List<File>
-        get() = platformRootDirectories.map { it.resolve("${it.name}.xcodeproj") }
-
-    @TaskAction
-    fun action() {
-        platformRootDirectories.forEach {
-            workingDir = it
-            commandLine(*SwiftPackageCLICommand.GENERATE_XCODE_PROJECT.toCommand())
-            exec()
+    @get:OutputFile
+    val outputPackageResolvedFile: Provider<File>
+        get() = platformFamily.map {
+            project.swiftPackageBuildDirs.packageResolvedFile(it)
         }
+
+    @get:OutputDirectory
+    val outputXcodeProjectFile: Provider<File>
+        get() = platformFamily.map {
+            project.swiftPackageBuildDirs.xcodeProjectFile(it)
+        }
+
+    override fun exec() {
+        workingDir = project.swiftPackageBuildDirs.platformRoot(platformFamily.get())
+        commandLine("swift", "package", "generate-xcodeproj")
+
+        super.exec()
     }
 }

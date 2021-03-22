@@ -1,12 +1,13 @@
 package org.zoldater.kotlin.gradle.spm.tasks
 
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Nested
-import org.gradle.api.tasks.OutputDirectories
-import org.gradle.api.tasks.TaskAction
-import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand
-import org.zoldater.kotlin.gradle.spm.SwiftPackageCLICommand.Companion.toCommand
+import org.gradle.api.tasks.OutputDirectory
+import org.jetbrains.kotlin.konan.target.Family
 import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
+import org.zoldater.kotlin.gradle.spm.swiftPackageBuildDirs
 import java.io.File
 
 abstract class BuildFrameworksTask : Exec() {
@@ -16,29 +17,32 @@ abstract class BuildFrameworksTask : Exec() {
          */
         description = "Build the target in the build root"
         group = KotlinSpmPlugin.TASK_GROUP
-
-        commandLine("echo", "todo: remove") // FIXME: ???
     }
 
     @Nested
-    lateinit var platformRootDirectories: List<File>
+    val platformFamily: Property<Family> = project.objects.property(Family::class.java)
 
-    @get:OutputDirectories
-    val platformBuildDirectories: List<File>
-        get() = platformRootDirectories.map { it.resolve("build") }
+    @Nested
+    val platformDependency: Property<String> = project.objects.property(String::class.java)
 
-    @TaskAction
-    fun action() {
-        platformRootDirectories.forEach {
-            workingDir = it
-            commandLine(
-                *SwiftPackageCLICommand.BUILD_XCODE_PROJECT.toCommand(),
-                "-project", "${it.name}.xcodeproj",
-                "-target", it.name,
-                "-configuration", "Release",
-                "-quiet"
-            )
-            exec()
+    @get:OutputDirectory
+    val outputFrameworkDirectory: Provider<File>
+        get() = platformFamily.map {
+            project.swiftPackageBuildDirs.releaseDir(it).resolve("${platformDependency.get()}.framework")
         }
+
+    override fun exec() {
+        val family = platformFamily.get()
+
+        workingDir = project.swiftPackageBuildDirs.platformRoot(family)
+        commandLine(
+            "xcodebuild", "build",
+            "-project", "${family.name}.xcodeproj",
+            "-target", platformDependency.get(),
+            "-configuration", "Release",
+            "-quiet"
+        )
+
+        super.exec()
     }
 }

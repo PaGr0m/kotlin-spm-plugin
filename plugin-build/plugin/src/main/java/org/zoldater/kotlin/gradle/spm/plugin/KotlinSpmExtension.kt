@@ -10,11 +10,8 @@ import javax.inject.Inject
 @Suppress("UnnecessaryAbstractClass")
 abstract class KotlinSpmExtension @Inject constructor(private val project: Project) {
 
-    private val platformsManagerContainer = project.container(PlatformManager.SwiftPackageManager::class.java)
-
-    @get:Nested
-    val platformsManager: List<PlatformManager.SwiftPackageManager>
-        get() = platformsManagerContainer.toList()
+    @Nested
+    val platformsManagerContainer = project.container(PlatformManager.SwiftPackageManager::class.java)
 
     fun ios(version: String, configure: PlatformManager.PlatformIosManager.() -> Unit) {
         val iosManager = PlatformManager.PlatformIosManager(version, project).apply(configure)

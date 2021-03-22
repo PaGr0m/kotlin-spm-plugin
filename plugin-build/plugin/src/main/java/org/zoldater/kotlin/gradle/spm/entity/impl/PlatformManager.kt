@@ -11,23 +11,36 @@ import org.zoldater.kotlin.gradle.spm.entity.Target
 import javax.inject.Inject
 
 class PlatformManager {
-    class PlatformIosManager(val platformVersion: String, project: Project) : SwiftPackageManager(project) {
+    class PlatformIosManager(
+        override val version: String,
+        project: Project,
+    ) : SwiftPackageManager(project) {
         override val family: Family get() = Family.IOS
     }
 
-    class PlatformMacosManager(val platformVersion: String, project: Project) : SwiftPackageManager(project) {
+    class PlatformMacosManager(
+        override val version: String,
+        project: Project,
+    ) : SwiftPackageManager(project) {
         override val family: Family get() = Family.OSX
     }
 
-    class PlatformTvosManager(val platformVersion: String, project: Project) : SwiftPackageManager(project) {
+    class PlatformTvosManager(
+        override val version: String,
+        project: Project,
+    ) : SwiftPackageManager(project) {
         override val family: Family get() = Family.TVOS
     }
 
-    class PlatformWatchosManager(val platformVersion: String, project: Project) : SwiftPackageManager(project) {
+    class PlatformWatchosManager(
+        override val version: String,
+        project: Project,
+    ) : SwiftPackageManager(project) {
         override val family: Family get() = Family.WATCHOS
     }
 
     abstract class SwiftPackageManager @Inject constructor(project: Project) {
+        abstract val version: String
         abstract val family: Family
 
         @Input
@@ -35,8 +48,10 @@ class PlatformManager {
 
         private val platformsContainer = project.container(SupportedPlatformManager.SupportedPlatform::class.java)
         private val productsContainer = project.container(Product::class.java)
-        private val dependenciesContainer = project.container(DependencyManager.Package::class.java)
         private val targetsContainer = project.container(Target::class.java)
+
+        @Nested
+        val dependenciesContainer = project.container(DependencyManager.Package::class.java)
 
         @get:Nested
         val platforms: List<SupportedPlatformManager.SupportedPlatform>

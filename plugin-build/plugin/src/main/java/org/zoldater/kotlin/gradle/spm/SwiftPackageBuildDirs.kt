@@ -5,19 +5,20 @@ import org.jetbrains.kotlin.konan.target.Family
 import java.io.File
 
 class SwiftPackageBuildDirs(private val project: Project) {
-    val root: File
+    private val root: File
         get() = project.buildDir.resolve("swiftPackageManager")
 
-    val swiftPackageFile: File
-        get() = root.resolve("Package.swift")
+    fun platformRoot(family: Family): File = root.resolve(family.name)
 
-    val release: File
-        get() = root.resolve("build/Release")
+    fun packageSwiftFile(family: Family): File = platformRoot(family).resolve("Package.swift")
 
-    val def: File
-        get() = root.resolve("def")
+    fun packageResolvedFile(family: Family): File = platformRoot(family).resolve("Package.resolved")
 
-    fun pathToPlatformRoot(family: Family): File = root.resolve(family.name)
+    fun xcodeProjectFile(family: Family): File = platformRoot(family).resolve("${family}.xcodeproj")
+
+    fun releaseDir(family: Family): File = platformRoot(family).resolve("build").resolve("Release")
+
+    fun defsDir(family: Family): File = platformRoot(family).resolve("defs")
 }
 
 val Project.swiftPackageBuildDirs: SwiftPackageBuildDirs

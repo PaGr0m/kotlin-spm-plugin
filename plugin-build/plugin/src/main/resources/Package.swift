@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "$PLATFORM_NAME",
     platforms: [
-        $PLATFORM_TYPE
+        $PLATFORM_TYPE("$PLATFORM_VERSION")
     ],
     products: [
         .library(

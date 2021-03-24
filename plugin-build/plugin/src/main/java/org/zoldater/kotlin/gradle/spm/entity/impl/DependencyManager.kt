@@ -30,9 +30,9 @@ class DependencyManager {
     data class Package(
         @Input val url: String,
         @Input @Optional val version: String? = null,
-        @Input @Optional val dependencyName: String? = null,
+        @Input val dependencyName: String = url,
     ) : Named {
-        override fun getName(): String = url
+        override fun getName(): String = dependencyName
 
         fun convertToPackageContent(): String {
             return """

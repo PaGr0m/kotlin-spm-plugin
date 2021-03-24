@@ -53,7 +53,6 @@ abstract class GenerateDefFileTask : DefaultTask() {
         defFile.writeText(
             """
             language = Objective-C
-            modules = $frameworkName
             headers = ${headers.joinToString(" ")}
             """.trimIndent()
         )

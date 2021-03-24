@@ -48,12 +48,12 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         project: Project,
         platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
     ) {
-        platforms.all {
+        platforms.all { platform ->
             project.tasks.register(
-                "initProject_${it.family}",
+                "$INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME${platform.family}",
                 InitializeSwiftPackageProjectTask::class.java
             ) { task ->
-                task.platformFamily.set(it.family)
+                task.platformFamily.set(platform.family)
             }
         }
     }
@@ -64,12 +64,12 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
     ) {
         platforms.all { platform ->
             val initProjectTask = project.tasks.named(
-                "initProject_${platform.family}",
+                "$INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME${platform.family}",
                 InitializeSwiftPackageProjectTask::class.java
             )
 
             project.tasks.register(
-                "createPackageSwift_${platform.family}",
+                "$CREATE_PACKAGE_SWIFT_FILE_TASK_NAME${platform.family}",
                 CreateSwiftPackageFileTask::class.java
             ) { task ->
                 task.platformFamily.set(platform.family)
@@ -87,12 +87,12 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
     ) {
         platforms.all { platform ->
             val createPackageSwiftFileTask = project.tasks.named(
-                "createPackageSwift_${platform.family}",
+                "$CREATE_PACKAGE_SWIFT_FILE_TASK_NAME${platform.family}",
                 CreateSwiftPackageFileTask::class.java
             )
 
             project.tasks.register(
-                "generateXcodeProject_${platform.family}",
+                "$GENERATE_XCODE_TASK_NAME${platform.family}",
                 GenerateXcodeTask::class.java
             ) { task ->
                 task.platformFamily.set(platform.family)
@@ -108,13 +108,13 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
     ) {
         platforms.all { platform ->
             val generateXcodeTask = project.tasks.named(
-                "generateXcodeProject_${platform.family}",
+                "$GENERATE_XCODE_TASK_NAME${platform.family}",
                 GenerateXcodeTask::class.java
             )
 
             platform.dependenciesContainer.all { dependency ->
                 project.tasks.register(
-                    "buildFramework_${platform.family}_${dependency.dependencyName}",
+                    "$BUILD_FRAMEWORK_TASK_NAME${platform.family}${dependency.dependencyName}",
                     BuildFrameworksTask::class.java
                 ) { task ->
                     task.platformFamily.set(platform.family)
@@ -133,12 +133,12 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         platforms.all { platform ->
             platform.dependenciesContainer.all { dependency ->
                 val buildFrameworkTask = project.tasks.named(
-                    "buildFramework_${platform.family}_${dependency.dependencyName}",
+                    "$BUILD_FRAMEWORK_TASK_NAME${platform.family}${dependency.dependencyName}",
                     BuildFrameworksTask::class.java
                 )
 
                 project.tasks.register(
-                    "generateDefFile_${platform.family}_${dependency.dependencyName}",
+                    "$GENERATE_DEF_FILE_TASK_NAME${platform.family}${dependency.dependencyName}",
                     GenerateDefFileTask::class.java
                 ) { task ->
                     task.platformFamily.set(platform.family)
@@ -162,7 +162,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
                 if (family == mppTarget.konanTarget.family) {
                     platform.dependenciesContainer.all { dependency ->
                         val defFileTask = project.tasks.named(
-                            "generateDefFile_${family}_${dependency.dependencyName}",
+                            "$GENERATE_DEF_FILE_TASK_NAME${family}${dependency.dependencyName}",
                             GenerateDefFileTask::class.java
                         )
                         mppTarget.compilations.getByName(KotlinCompilation.MAIN_COMPILATION_NAME).cinterops.create(
@@ -187,7 +187,6 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         const val SPM_EXTENSION_NAME = "spm"
         const val TASK_GROUP = "swift package manager"
 
-        // TODO: вернуть константы
         const val INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME = "initializeSwiftPackageProject"
         const val CREATE_PACKAGE_SWIFT_FILE_TASK_NAME = "createPackageSwiftFile"
         const val GENERATE_XCODE_TASK_NAME = "generateXcode"

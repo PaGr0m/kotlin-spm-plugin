@@ -4,12 +4,17 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
 
-abstract class SpmResolveDependencyTask : DefaultTask() {
+abstract class InteropFrameworkTask : DefaultTask() {
 
     init {
-//        description = TODO()
+        description = ""
         group = KotlinSpmPlugin.TASK_GROUP
     }
+
+    /*
+        Headers from framework
+
+     */
 
     @TaskAction
     fun action() {

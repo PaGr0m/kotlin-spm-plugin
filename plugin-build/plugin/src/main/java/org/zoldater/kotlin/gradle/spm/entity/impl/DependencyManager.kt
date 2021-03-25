@@ -12,6 +12,11 @@ import org.zoldater.kotlin.gradle.spm.entity.impl.DependencyManager.Package
 class DependencyManager {
     val dependencies = mutableListOf<Package>()
 
+    fun `package`(url: String, version: String, name: String) {
+        val dependency = Package(url, version, name)
+        dependencies.add(dependency)
+    }
+
     fun `package`(url: String, version: String) {
         val dependency = Package(url, version)
         dependencies.add(dependency)
@@ -24,8 +29,19 @@ class DependencyManager {
 
     data class Package(
         @Input val url: String,
-        @Input @Optional val version: String? = null
+        @Input @Optional val version: String? = null,
+        @Input val dependencyName: String = url,
     ) : Named {
-        override fun getName(): String = url
+        override fun getName(): String = dependencyName
+
+        fun convertToPackageContent(): String {
+            return """
+                .package(
+                    name: "$dependencyName",
+                    url: "$url",
+                    from: "$version"
+                )
+            """.trimIndent()
+        }
     }
 }

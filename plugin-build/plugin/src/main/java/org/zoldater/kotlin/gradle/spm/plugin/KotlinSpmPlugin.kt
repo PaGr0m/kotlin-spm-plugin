@@ -1,141 +1,202 @@
 package org.zoldater.kotlin.gradle.spm.plugin
 
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.zoldater.kotlin.gradle.spm.entity.impl.PlatformManager
 import org.zoldater.kotlin.gradle.spm.tasks.*
 
 abstract class KotlinSpmPlugin : Plugin<Project> {
-    override fun apply(project: Project) {
+
+    override fun apply(project: Project) = project.pluginManager.withPlugin(MULTIPLATFORM_PLUGIN_NAME) {
+        val multiplatformExtension = project.extensions.getByName(KOTLIN_PROJECT_EXTENSION_NAME)
+                as KotlinMultiplatformExtension
         val spmExtension = project.extensions.create(SPM_EXTENSION_NAME, KotlinSpmExtension::class.java, project)
 
-        // Task registration (order cannot be changed)
-        registerGenerateManifestTask(project)
-        registerResolveDependencyTask(project)
-        registerBuildDependencyTask(project)
-        registerInteropFrameworkTask(project)
-        registerLinkKlibTask(project)
-        registerSpmImportTask(project)
-        registerGraphTask(project) // FIXME: tmp
-        registerGenerateSwiftPackage(project)
-        registerGenerateXcode(project)
+        val availablePlatforms = spmExtension.platformsManagerContainer
+
+        // Graph task registration (order should not be changed)
+        registerInitializeSwiftPackageProjectTask(project, availablePlatforms)
+        registerCreateSwiftPackageFileTask(project, availablePlatforms)
+        registerGenerateXcodeTask(project, availablePlatforms)
+        registerBuildFrameworksTask(project, availablePlatforms)
+        registerGenerateDefFileTask(project, availablePlatforms)
+
+        registerInteropFrameworkTask(project, availablePlatforms, multiplatformExtension)
+
+        registerSpmCleanTask(project, availablePlatforms)
     }
 
-    private fun registerGenerateManifestTask(
-        project: Project
+    private fun registerSpmCleanTask(
+        project: Project,
+        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
     ) {
-        project.tasks.register(GENERATE_MANIFEST_TASK_NAME, SpmGenerateManifestTask::class.java) {
-            it.doFirst { println(GENERATE_MANIFEST_TASK_NAME) }
+        platforms.all { platform ->
+            project.tasks.register(
+                "$CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME${platform.family}",
+                CleanSwiftPackageProjectTask::class.java
+            ) { task ->
+                task.platformFamily.set(platform.family)
+            }
         }
     }
 
-    private fun registerResolveDependencyTask(
-        project: Project
+    private fun registerInitializeSwiftPackageProjectTask(
+        project: Project,
+        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
     ) {
-        val generateManifestTask = project.tasks.named(GENERATE_MANIFEST_TASK_NAME, SpmGenerateManifestTask::class.java)
-
-        project.tasks.register(RESOLVE_DEPENDENCY_TASK_NAME, SpmResolveDependencyTask::class.java) {
-            it.dependsOn(generateManifestTask)
-
-            it.doFirst { println(RESOLVE_DEPENDENCY_TASK_NAME) }
+        platforms.all { platform ->
+            project.tasks.register(
+                "$INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME${platform.family}",
+                InitializeSwiftPackageProjectTask::class.java
+            ) { task ->
+                task.platformFamily.set(platform.family)
+            }
         }
     }
 
-    private fun registerBuildDependencyTask(
-        project: Project
+    private fun registerCreateSwiftPackageFileTask(
+        project: Project,
+        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
     ) {
-        val resolveDependencyTask = project.tasks.named(
-            RESOLVE_DEPENDENCY_TASK_NAME,
-            SpmResolveDependencyTask::class.java
-        )
+        platforms.all { platform ->
+            val initProjectTask = project.tasks.named(
+                "$INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME${platform.family}",
+                InitializeSwiftPackageProjectTask::class.java
+            )
 
-        project.tasks.register(BUILD_DEPENDENCY_TASK_NAME, SpmBuildDependencyTask::class.java) {
-            it.dependsOn(resolveDependencyTask)
+            project.tasks.register(
+                "$CREATE_PACKAGE_SWIFT_FILE_TASK_NAME${platform.family}",
+                CreateSwiftPackageFileTask::class.java
+            ) { task ->
+                task.platformFamily.set(platform.family)
+                task.platformVersion.set(platform.version)
+                task.platformDependencies.addAll(platform.dependencies)
 
-            it.doFirst { println(BUILD_DEPENDENCY_TASK_NAME) }
+                task.dependsOn(initProjectTask)
+            }
         }
     }
 
+    private fun registerGenerateXcodeTask(
+        project: Project,
+        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
+    ) {
+        platforms.all { platform ->
+            val createPackageSwiftFileTask = project.tasks.named(
+                "$CREATE_PACKAGE_SWIFT_FILE_TASK_NAME${platform.family}",
+                CreateSwiftPackageFileTask::class.java
+            )
+
+            project.tasks.register(
+                "$GENERATE_XCODE_TASK_NAME${platform.family}",
+                GenerateXcodeTask::class.java
+            ) { task ->
+                task.platformFamily.set(platform.family)
+
+                task.dependsOn(createPackageSwiftFileTask)
+            }
+        }
+    }
+
+    private fun registerBuildFrameworksTask(
+        project: Project,
+        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
+    ) {
+        platforms.all { platform ->
+            val generateXcodeTask = project.tasks.named(
+                "$GENERATE_XCODE_TASK_NAME${platform.family}",
+                GenerateXcodeTask::class.java
+            )
+
+            platform.dependenciesContainer.all { dependency ->
+                project.tasks.register(
+                    "$BUILD_FRAMEWORK_TASK_NAME${platform.family}${dependency.dependencyName}",
+                    BuildFrameworksTask::class.java
+                ) { task ->
+                    task.platformFamily.set(platform.family)
+                    task.platformDependency.set(dependency.dependencyName)
+
+                    task.dependsOn(generateXcodeTask)
+                }
+            }
+        }
+    }
+
+    private fun registerGenerateDefFileTask(
+        project: Project,
+        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
+    ) {
+        platforms.all { platform ->
+            platform.dependenciesContainer.all { dependency ->
+                val buildFrameworkTask = project.tasks.named(
+                    "$BUILD_FRAMEWORK_TASK_NAME${platform.family}${dependency.dependencyName}",
+                    BuildFrameworksTask::class.java
+                )
+
+                project.tasks.register(
+                    "$GENERATE_DEF_FILE_TASK_NAME${platform.family}${dependency.dependencyName}",
+                    GenerateDefFileTask::class.java
+                ) { task ->
+                    task.platformFamily.set(platform.family)
+                    task.platformDependency.set(dependency.dependencyName)
+
+                    task.dependsOn(buildFrameworkTask)
+                }
+            }
+        }
+    }
+
+    @Suppress("UnstableApiUsage")
     private fun registerInteropFrameworkTask(
-        project: Project
+        project: Project,
+        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
+        multiplatformExtension: KotlinMultiplatformExtension,
     ) {
-        val buildDependencyTask = project.tasks.named(BUILD_DEPENDENCY_TASK_NAME, SpmBuildDependencyTask::class.java)
+        multiplatformExtension.supportedTargets().all { mppTarget ->
+            platforms.all { platform ->
+                val family = platform.family
+                if (family == mppTarget.konanTarget.family) {
+                    platform.dependenciesContainer.all { dependency ->
+                        val defFileTask = project.tasks.named(
+                            "$GENERATE_DEF_FILE_TASK_NAME${family}${dependency.dependencyName}",
+                            GenerateDefFileTask::class.java
+                        )
+                        mppTarget.compilations.getByName(KotlinCompilation.MAIN_COMPILATION_NAME).cinterops.create(
+                            dependency.dependencyName
+                        ) { interop ->
+                            val interopTask = project.tasks.getByPath(interop.interopProcessingTaskName)
+                            interopTask.dependsOn(defFileTask)
+                            interopTask.group = TASK_GROUP
 
-        project.tasks.register(INTEROP_FRAMEWORK_TASK_NAME, SpmInteropFrameworkTask::class.java) {
-            it.dependsOn(buildDependencyTask)
-
-            it.doFirst { println(INTEROP_FRAMEWORK_TASK_NAME) }
-        }
-    }
-
-    private fun registerLinkKlibTask(
-        project: Project
-    ) {
-        val interopFrameworkTask = project.tasks.named(INTEROP_FRAMEWORK_TASK_NAME, SpmInteropFrameworkTask::class.java)
-
-        project.tasks.register(LINK_KLIB_TASK_NAME, SpmLinkKlibTask::class.java) {
-            it.dependsOn(interopFrameworkTask)
-
-            it.doFirst { println(LINK_KLIB_TASK_NAME) }
-        }
-    }
-
-    private fun registerSpmImportTask(
-        project: Project
-    ) {
-        val linkKlibTask = project.tasks.named(LINK_KLIB_TASK_NAME, SpmLinkKlibTask::class.java)
-
-        project.tasks.register(SPM_IMPORT_TASK_NAME, SpmImportTask::class.java) {
-            it.dependsOn(linkKlibTask)
-
-            it.doFirst { println(SPM_IMPORT_TASK_NAME) }
-        }
-    }
-
-    private fun registerGenerateSwiftPackage(
-        project: Project
-    ) {
-        project.tasks.register(SPM_GENERATE_SWIFT_PACKAGE, GenerateSwiftPackageTask::class.java) {
-            it.doFirst { println(SPM_GENERATE_SWIFT_PACKAGE) }
-        }
-    }
-
-    private fun registerGenerateXcode(
-        project: Project
-    ) {
-        project.tasks.register(SPM_GENERATE_XCODE, GenerateXcodeProjectTask::class.java) {
-            it.doFirst { println(SPM_GENERATE_XCODE) }
-        }
-    }
-
-    // FIXME: tmp
-    private fun registerGraphTask(
-        project: Project
-    ) {
-        val spmImportTask = project.tasks.named(SPM_IMPORT_TASK_NAME, SpmImportTask::class.java)
-
-        project.tasks.register(GRAPH_TASK_NAME, SpmGraphTask::class.java) {
-            it.dependsOn(spmImportTask)
-
-            it.doFirst { println(GRAPH_TASK_NAME) }
+                            interop.defFileProperty.set(defFileTask.flatMap { it.outputDefFile })
+                            interop.packageName = "spm.${dependency.dependencyName}"
+                        }
+                    }
+                }
+            }
         }
     }
 
     companion object {
+        private const val KOTLIN_PROJECT_EXTENSION_NAME = "kotlin"
+        const val MULTIPLATFORM_PLUGIN_NAME = "kotlin-multiplatform"
         const val SPM_EXTENSION_NAME = "spm"
-
         const val TASK_GROUP = "swift package manager"
 
-        const val GRAPH_TASK_NAME = "spmGraphTask" // FIXME: temporary
+        const val INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME = "initializeSwiftPackageProject"
+        const val CREATE_PACKAGE_SWIFT_FILE_TASK_NAME = "createPackageSwiftFile"
+        const val GENERATE_XCODE_TASK_NAME = "generateXcode"
+        const val BUILD_FRAMEWORK_TASK_NAME = "buildFrameworks"
+        const val GENERATE_DEF_FILE_TASK_NAME = "generateDefFile"
+        const val CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME = "cleanSwiftPackageProject"
+        const val INTEROP_FRAMEWORK_TASK_NAME = "interopFramework"
 
-        const val GENERATE_MANIFEST_TASK_NAME = "spmGenerateManifest"
-        const val RESOLVE_DEPENDENCY_TASK_NAME = "spmResolveDependency"
-        const val BUILD_DEPENDENCY_TASK_NAME = "spmBuildDependency"
-        const val INTEROP_FRAMEWORK_TASK_NAME = "spmInteropFramework"
-        const val LINK_KLIB_TASK_NAME = "spmLinkKlib"
-        const val SPM_IMPORT_TASK_NAME = "spmImport"
-
-        // TODO: Tested
-        const val SPM_GENERATE_SWIFT_PACKAGE = "spmGenerateSwiftPackage"
-        const val SPM_GENERATE_XCODE = "spmGenerateXcode"
+        private fun KotlinMultiplatformExtension.supportedTargets() = targets
+            .withType(KotlinNativeTarget::class.java)
+            .matching { it.konanTarget.family.isAppleFamily }
     }
 }

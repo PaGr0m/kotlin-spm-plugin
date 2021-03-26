@@ -1,3 +1,5 @@
+package `multiple-platform`
+
 plugins {
     java
     kotlin("multiplatform")

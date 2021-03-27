@@ -20,7 +20,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
 
         // Graph task registration (order should not be changed)
         registerInitializeSwiftPackageProjectTask(project, availablePlatforms)
-        registerCreateSwiftPackageFileTask(project, availablePlatforms)
+        registerCreatePackageSwiftFileTask(project, availablePlatforms)
         registerGenerateXcodeTask(project, availablePlatforms)
         registerBuildFrameworksTask(project, availablePlatforms)
         registerGenerateDefFileTask(project, availablePlatforms)
@@ -58,7 +58,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         }
     }
 
-    private fun registerCreateSwiftPackageFileTask(
+    private fun registerCreatePackageSwiftFileTask(
         project: Project,
         platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
     ) {
@@ -70,7 +70,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
 
             project.tasks.register(
                 "$CREATE_PACKAGE_SWIFT_FILE_TASK_NAME${platform.family}",
-                CreateSwiftPackageFileTask::class.java
+                CreatePackageSwiftFileTask::class.java
             ) { task ->
                 task.platformFamily.set(platform.family)
                 task.platformVersion.set(platform.version)
@@ -88,7 +88,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         platforms.all { platform ->
             val createPackageSwiftFileTask = project.tasks.named(
                 "$CREATE_PACKAGE_SWIFT_FILE_TASK_NAME${platform.family}",
-                CreateSwiftPackageFileTask::class.java
+                CreatePackageSwiftFileTask::class.java
             )
 
             project.tasks.register(

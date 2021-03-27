@@ -1,6 +1,6 @@
 package org.zoldater.kotlin.gradle.spm.plugin
 
-import junit.framework.Assert.*
+import org.junit.Assert.*
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.kotlin.konan.target.Family
@@ -14,7 +14,6 @@ import java.io.File
 
 // TODO: add not null
 class SinglePlatformFunctionalTest {
-    // TODO:
     @Rule
     @JvmField
     val testProjectDir: TemporaryFolder = TemporaryFolder()
@@ -39,7 +38,7 @@ class SinglePlatformFunctionalTest {
     }
 
     /**
-     * TODO:
+     * Command call for one platform with one dependency
      */
     @Test
     fun `test initialize IOS swift project task`() {
@@ -49,21 +48,13 @@ class SinglePlatformFunctionalTest {
             .withPluginClasspath()
             .build()
 
-        val actualTasks = listOf(
+        val expectedTasks = listOf(
             result.task(":$initTaskName"),
         )
 
         // Checking participating tasks
-        assertTrue(
-            actualTasks.size == result.tasks.size &&
-            actualTasks.containsAll(result.tasks) &&
-            result.tasks.containsAll(actualTasks)
-        )
-
-        result.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.SUCCESS, buildTask?.outcome)
-        }
+        assertArrayEquals(expectedTasks, result.tasks)
+        checkTasksOutcome(result.tasks, TaskOutcome.SUCCESS)
 
         // Checking task output
         assertTrue(result.output.contains(initializeTaskOutput(Family.IOS), true))
@@ -90,7 +81,7 @@ class SinglePlatformFunctionalTest {
             .withPluginClasspath()
             .build()
 
-        val actualTasks = listOf(
+        val expectedTasks = listOf(
             result.task(":$initTaskName"),
             result.task(":$createPackageSwiftTaskName"),
         )
@@ -101,16 +92,8 @@ class SinglePlatformFunctionalTest {
             .readText()
 
         // Checking participating tasks
-        assertTrue(
-            actualTasks.size == result.tasks.size &&
-            actualTasks.containsAll(result.tasks) &&
-            result.tasks.containsAll(actualTasks)
-        )
-
-        result.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.SUCCESS, buildTask?.outcome)
-        }
+        assertArrayEquals(expectedTasks, result.tasks)
+        checkTasksOutcome(result.tasks, TaskOutcome.SUCCESS)
 
         // TODO: check Package.swift content?
         // Checking file changes
@@ -125,23 +108,15 @@ class SinglePlatformFunctionalTest {
             .withPluginClasspath()
             .build()
 
-        val actualTasks = listOf(
+        val expectedTasks = listOf(
             result.task(":$initTaskName"),
             result.task(":$createPackageSwiftTaskName"),
             result.task(":$generateXcodeTaskName"),
         )
 
         // Checking participating tasks
-        assertTrue(
-            actualTasks.size == result.tasks.size &&
-            actualTasks.containsAll(result.tasks) &&
-            result.tasks.containsAll(actualTasks)
-        )
-
-        result.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.SUCCESS, buildTask?.outcome)
-        }
+        assertArrayEquals(expectedTasks, result.tasks)
+        checkTasksOutcome(result.tasks, TaskOutcome.SUCCESS)
 
         // TODO: check Package.resolved content?
         // Checking directories creation and files creation using task
@@ -159,7 +134,7 @@ class SinglePlatformFunctionalTest {
             .withPluginClasspath()
             .build()
 
-        val actualTasks = listOf(
+        val expectedTasks = listOf(
             result.task(":$initTaskName"),
             result.task(":$createPackageSwiftTaskName"),
             result.task(":$generateXcodeTaskName"),
@@ -167,16 +142,8 @@ class SinglePlatformFunctionalTest {
         )
 
         // Checking participating tasks
-        assertTrue(
-            actualTasks.size == result.tasks.size &&
-            actualTasks.containsAll(result.tasks) &&
-            result.tasks.containsAll(actualTasks)
-        )
-
-        result.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.SUCCESS, buildTask?.outcome)
-        }
+        assertArrayEquals(expectedTasks, result.tasks)
+        checkTasksOutcome(result.tasks, TaskOutcome.SUCCESS)
 
         // TODO: check other directories?
         // Checking directories creation and files creation using task
@@ -194,7 +161,7 @@ class SinglePlatformFunctionalTest {
             .withPluginClasspath()
             .build()
 
-        val actualTasks = listOf(
+        val expectedTasks = listOf(
             result.task(":$initTaskName"),
             result.task(":$createPackageSwiftTaskName"),
             result.task(":$generateXcodeTaskName"),
@@ -203,16 +170,8 @@ class SinglePlatformFunctionalTest {
         )
 
         // Checking participating tasks
-        assertTrue(
-            actualTasks.size == result.tasks.size &&
-            actualTasks.containsAll(result.tasks) &&
-            result.tasks.containsAll(actualTasks)
-        )
-
-        result.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.SUCCESS, buildTask?.outcome)
-        }
+        assertArrayEquals(expectedTasks, result.tasks)
+        checkTasksOutcome(result.tasks, TaskOutcome.SUCCESS)
 
         // TODO: check .def file content?
         // Checking directories creation and files creation using task
@@ -232,7 +191,7 @@ class SinglePlatformFunctionalTest {
             .withPluginClasspath()
             .build()
 
-        val actualTasks = listOf(
+        val expectedTasks = listOf(
             result.task(":$initTaskName"),
             result.task(":$createPackageSwiftTaskName"),
             result.task(":$generateXcodeTaskName"),
@@ -242,29 +201,23 @@ class SinglePlatformFunctionalTest {
         )
 
         // Checking participating tasks
-        assertTrue(
-            actualTasks.size == result.tasks.size &&
-            actualTasks.containsAll(result.tasks) &&
-            result.tasks.containsAll(actualTasks)
-        )
-
-        result.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.SUCCESS, buildTask?.outcome)
-        }
+        assertArrayEquals(expectedTasks, result.tasks)
+        checkTasksOutcome(result.tasks, TaskOutcome.SUCCESS)
 
         // TODO: check classes dir...
         val interopDir = testProjectDir.root
+            .resolve("build")
             .resolve("classes")
             .resolve("kotlin")
             .resolve("iosX64")
             .resolve("main")
         assertTrue(interopDir.exists())
-        assertTrue(interopDir.resolve("example-cinterop-$FRAMEWORK_NAME.klib").exists())
+        assertTrue(interopDir.resolve("single-platform-test-project-cinterop-$FRAMEWORK_NAME.klib").exists())
     }
 
     /**
-     * TODO:
+     * Double command call for one platform with one dependency.
+     * UP-TO-DATE checking
      */
     @Test
     fun `test initialize IOS swift project task with UP-TO-DATE check`() {
@@ -280,26 +233,16 @@ class SinglePlatformFunctionalTest {
             .withPluginClasspath()
             .build()
 
-        val actualTasks = listOf(
+        val expectedTasks = listOf(
             result.task(":$initTaskName"),
         )
 
         // Checking participating tasks
-        assertTrue(
-            actualTasks.size == result.tasks.size &&
-            actualTasks.containsAll(result.tasks) &&
-            result.tasks.containsAll(actualTasks)
-        )
+        assertArrayEquals(expectedTasks, result.tasks)
+        assertArrayEquals(expectedTasks, sameResult.tasks)
 
-        result.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.SUCCESS, buildTask?.outcome)
-        }
-
-        sameResult.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.UP_TO_DATE, buildTask?.outcome)
-        }
+        checkTasksOutcome(result.tasks, TaskOutcome.SUCCESS)
+        checkTasksOutcome(sameResult.tasks, TaskOutcome.UP_TO_DATE)
     }
 
     @Test
@@ -316,27 +259,17 @@ class SinglePlatformFunctionalTest {
             .withPluginClasspath()
             .build()
 
-        val actualTasks = listOf(
+        val expectedTasks = listOf(
             result.task(":$initTaskName"),
             result.task(":$createPackageSwiftTaskName"),
         )
 
         // Checking participating tasks
-        assertTrue(
-            actualTasks.size == result.tasks.size &&
-            actualTasks.containsAll(result.tasks) &&
-            result.tasks.containsAll(actualTasks)
-        )
+        assertArrayEquals(expectedTasks, result.tasks)
+        assertArrayEquals(expectedTasks, sameResult.tasks)
 
-        result.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.SUCCESS, buildTask?.outcome)
-        }
-
-        sameResult.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.UP_TO_DATE, buildTask?.outcome)
-        }
+        checkTasksOutcome(result.tasks, TaskOutcome.SUCCESS)
+        checkTasksOutcome(sameResult.tasks, TaskOutcome.UP_TO_DATE)
     }
 
     @Test
@@ -353,28 +286,18 @@ class SinglePlatformFunctionalTest {
             .withPluginClasspath()
             .build()
 
-        val actualTasks = listOf(
+        val expectedTasks = listOf(
             result.task(":$initTaskName"),
             result.task(":$createPackageSwiftTaskName"),
             result.task(":$generateXcodeTaskName"),
         )
 
         // Checking participating tasks
-        assertTrue(
-            actualTasks.size == result.tasks.size &&
-            actualTasks.containsAll(result.tasks) &&
-            result.tasks.containsAll(actualTasks)
-        )
+        assertArrayEquals(expectedTasks, result.tasks)
+        assertArrayEquals(expectedTasks, sameResult.tasks)
 
-        result.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.SUCCESS, buildTask?.outcome)
-        }
-
-        sameResult.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.UP_TO_DATE, buildTask?.outcome)
-        }
+        checkTasksOutcome(result.tasks, TaskOutcome.SUCCESS)
+        checkTasksOutcome(sameResult.tasks, TaskOutcome.UP_TO_DATE)
     }
 
     @Test
@@ -391,7 +314,7 @@ class SinglePlatformFunctionalTest {
             .withPluginClasspath()
             .build()
 
-        val actualTasks = listOf(
+        val expectedTasks = listOf(
             result.task(":$initTaskName"),
             result.task(":$createPackageSwiftTaskName"),
             result.task(":$generateXcodeTaskName"),
@@ -399,21 +322,11 @@ class SinglePlatformFunctionalTest {
         )
 
         // Checking participating tasks
-        assertTrue(
-            actualTasks.size == result.tasks.size &&
-            actualTasks.containsAll(result.tasks) &&
-            result.tasks.containsAll(actualTasks)
-        )
+        assertArrayEquals(expectedTasks, result.tasks)
+        assertArrayEquals(expectedTasks, sameResult.tasks)
 
-        result.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.SUCCESS, buildTask?.outcome)
-        }
-
-        sameResult.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.UP_TO_DATE, buildTask?.outcome)
-        }
+        checkTasksOutcome(result.tasks, TaskOutcome.SUCCESS)
+        checkTasksOutcome(sameResult.tasks, TaskOutcome.UP_TO_DATE)
     }
 
     @Test
@@ -430,7 +343,7 @@ class SinglePlatformFunctionalTest {
             .withPluginClasspath()
             .build()
 
-        val actualTasks = listOf(
+        val expectedTasks = listOf(
             result.task(":$initTaskName"),
             result.task(":$createPackageSwiftTaskName"),
             result.task(":$generateXcodeTaskName"),
@@ -439,21 +352,11 @@ class SinglePlatformFunctionalTest {
         )
 
         // Checking participating tasks
-        assertTrue(
-            actualTasks.size == result.tasks.size &&
-            actualTasks.containsAll(result.tasks) &&
-            result.tasks.containsAll(actualTasks)
-        )
+        assertArrayEquals(expectedTasks, result.tasks)
+        assertArrayEquals(expectedTasks, sameResult.tasks)
 
-        result.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.SUCCESS, buildTask?.outcome)
-        }
-
-        sameResult.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.UP_TO_DATE, buildTask?.outcome)
-        }
+        checkTasksOutcome(result.tasks, TaskOutcome.SUCCESS)
+        checkTasksOutcome(sameResult.tasks, TaskOutcome.UP_TO_DATE)
     }
 
     @Test
@@ -470,7 +373,7 @@ class SinglePlatformFunctionalTest {
             .withPluginClasspath()
             .build()
 
-        val actualTasks = listOf(
+        val expectedTasks = listOf(
             result.task(":$initTaskName"),
             result.task(":$createPackageSwiftTaskName"),
             result.task(":$generateXcodeTaskName"),
@@ -480,21 +383,23 @@ class SinglePlatformFunctionalTest {
         )
 
         // Checking participating tasks
-        assertTrue(
-            actualTasks.size == result.tasks.size &&
-            actualTasks.containsAll(result.tasks) &&
-            result.tasks.containsAll(actualTasks)
-        )
+        assertArrayEquals(expectedTasks, result.tasks)
+        assertArrayEquals(expectedTasks, sameResult.tasks)
 
-        result.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.SUCCESS, buildTask?.outcome)
-        }
+        checkTasksOutcome(result.tasks, TaskOutcome.SUCCESS)
+        checkTasksOutcome(sameResult.tasks, TaskOutcome.UP_TO_DATE)
+    }
 
-        sameResult.tasks.forEach { buildTask ->
-            assertNotNull(buildTask)
-            assertEquals(TaskOutcome.UP_TO_DATE, buildTask?.outcome)
-        }
+    @Test
+    fun `test create package swift task after init spm project task`() {
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir.root)
+            .withArguments(initTaskName, createPackageSwiftTaskName)
+            .withPluginClasspath()
+            .build()
+
+        assertEquals(TaskOutcome.UP_TO_DATE, result.task(":$initTaskName")?.outcome)
+        assertEquals(TaskOutcome.UP_TO_DATE, result.task(":$createPackageSwiftTaskName")?.outcome)
     }
 
     private fun initializeTaskOutput(family: Family): String = """
@@ -512,6 +417,8 @@ class SinglePlatformFunctionalTest {
     """.trimIndent()
 
     private fun File.toSpmBuildDir() = this.resolve("build").resolve(SwiftPackageBuildDirs.ROOT_DIRECTORY)
+
+
 
     private companion object {
         private const val TEMPLATE_GRADLE_SETTINGS = "/single-platform/settings.gradle.kts"

@@ -1,3 +1,1 @@
-package `multiple-platform`
-
-rootProject.name = "hello-world"
+rootProject.name = "multiple-platform-test-project"

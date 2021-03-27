@@ -8,7 +8,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
 
-class SpmTasks {
+class SimpleSpmTaskTest {
     @Rule
     @JvmField
     val testProjectDir: TemporaryFolder = TemporaryFolder()

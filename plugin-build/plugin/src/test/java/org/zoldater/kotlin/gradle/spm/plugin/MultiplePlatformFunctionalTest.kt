@@ -1,12 +1,13 @@
 package org.zoldater.kotlin.gradle.spm.plugin
 
+import org.gradle.testkit.runner.BuildTask
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.kotlin.konan.target.Family
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
 
@@ -21,8 +22,8 @@ class MultiplePlatformFunctionalTest {
     private val initTaskName = "${KotlinSpmPlugin.INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME}${Family.OSX}"
     private val createPackageSwiftTaskName = "${KotlinSpmPlugin.CREATE_PACKAGE_SWIFT_FILE_TASK_NAME}${Family.OSX}"
     private val generateXcodeTaskName = "${KotlinSpmPlugin.GENERATE_XCODE_TASK_NAME}${Family.OSX}"
-    private val buildFrameworkTaskName1 = "${KotlinSpmPlugin.BUILD_FRAMEWORK_TASK_NAME}${Family.IOS}${FRAMEWORK1_NAME}"
-    private val buildFrameworkTaskName2 = "${KotlinSpmPlugin.BUILD_FRAMEWORK_TASK_NAME}${Family.IOS}${FRAMEWORK2_NAME}"
+    private val buildFrameworkTaskName1 = "${KotlinSpmPlugin.BUILD_FRAMEWORK_TASK_NAME}${Family.OSX}${FRAMEWORK1_NAME}"
+    private val buildFrameworkTaskName2 = "${KotlinSpmPlugin.BUILD_FRAMEWORK_TASK_NAME}${Family.OSX}${FRAMEWORK2_NAME}"
 
     private lateinit var settingsFile: File
     private lateinit var buildFile: File
@@ -33,6 +34,7 @@ class MultiplePlatformFunctionalTest {
         buildFile = testProjectDir.newFile("build.gradle.kts").apply { writeText(templateBuildFile) }
     }
 
+    @Test
     fun `test build framework with common tasks`() {
         val buildFrameworkResult1 = GradleRunner.create()
             .withProjectDir(testProjectDir.root)
@@ -53,23 +55,32 @@ class MultiplePlatformFunctionalTest {
             buildFrameworkResult1.task(":$buildFrameworkTaskName1"),
         )
 
-        val expectedTasks2 = listOf(
-            buildFrameworkResult1.task(":$initTaskName"),
-            buildFrameworkResult1.task(":$createPackageSwiftTaskName"),
-            buildFrameworkResult1.task(":$generateXcodeTaskName"),
-            buildFrameworkResult1.task(":$buildFrameworkTaskName2"),
+        val expectedTasks2: List<BuildTask?> = listOf(
+            buildFrameworkResult2.task(":$initTaskName"),
+            buildFrameworkResult2.task(":$createPackageSwiftTaskName"),
+            buildFrameworkResult2.task(":$generateXcodeTaskName"),
+            buildFrameworkResult2.task(":$buildFrameworkTaskName2"),
         )
 
-        assertArrayEquals(expectedTasks1, buildFrameworkResult1.tasks)
-        assertArrayEquals(expectedTasks2, buildFrameworkResult2.tasks)
+        assertTrue(buildFrameworkResult1.tasks.containsAll(expectedTasks1))
+        assertTrue(buildFrameworkResult2.tasks.containsAll(expectedTasks2))
 
         checkTasksOutcome(buildFrameworkResult1.tasks, TaskOutcome.SUCCESS)
 
         buildFrameworkResult2.tasks.forEach { assertNotNull(it) }
-        assertEquals(TaskOutcome.UP_TO_DATE, buildFrameworkResult2.task(":$initTaskName"))
-        assertEquals(TaskOutcome.UP_TO_DATE, buildFrameworkResult2.task(":$createPackageSwiftTaskName"))
-        assertEquals(TaskOutcome.UP_TO_DATE, buildFrameworkResult2.task(":$generateXcodeTaskName"))
-        assertEquals(TaskOutcome.SUCCESS, buildFrameworkResult2.task(":$buildFrameworkTaskName2"))
+        assertEquals(TaskOutcome.UP_TO_DATE, buildFrameworkResult2.task(":$initTaskName")?.outcome)
+        assertEquals(TaskOutcome.UP_TO_DATE, buildFrameworkResult2.task(":$createPackageSwiftTaskName")?.outcome)
+        assertEquals(TaskOutcome.UP_TO_DATE, buildFrameworkResult2.task(":$generateXcodeTaskName")?.outcome)
+        assertEquals(TaskOutcome.SUCCESS, buildFrameworkResult2.task(":$buildFrameworkTaskName2")?.outcome)
+    }
+
+    @Test
+    fun `test with wrong platform`() {
+        val failResult = GradleRunner.create()
+            .withProjectDir(testProjectDir.root)
+            .withArguments("wrong task")
+            .withPluginClasspath()
+            .buildAndFail()
     }
 
     private companion object {

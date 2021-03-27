@@ -12,7 +12,6 @@ import org.junit.rules.TemporaryFolder
 import org.zoldater.kotlin.gradle.spm.SwiftPackageBuildDirs
 import java.io.File
 
-// TODO: add not null
 class SinglePlatformFunctionalTest {
     @Rule
     @JvmField
@@ -417,8 +416,6 @@ class SinglePlatformFunctionalTest {
     """.trimIndent()
 
     private fun File.toSpmBuildDir() = this.resolve("build").resolve(SwiftPackageBuildDirs.ROOT_DIRECTORY)
-
-
 
     private companion object {
         private const val TEMPLATE_GRADLE_SETTINGS = "/single-platform/settings.gradle.kts"

@@ -3,6 +3,7 @@ package org.zoldater.kotlin.gradle.spm.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -20,7 +21,7 @@ abstract class GenerateDefFileTask : DefaultTask() {
     @Nested
     val platformFamily: Property<Family> = project.objects.property(Family::class.java)
 
-    @Nested
+    @Input
     val platformDependency: Property<String> = project.objects.property(String::class.java)
 
     @get:OutputFile

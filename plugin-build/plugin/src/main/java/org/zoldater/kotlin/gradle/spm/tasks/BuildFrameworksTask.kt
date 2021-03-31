@@ -3,6 +3,7 @@ package org.zoldater.kotlin.gradle.spm.tasks
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
 import org.jetbrains.kotlin.konan.target.Family
@@ -22,7 +23,7 @@ abstract class BuildFrameworksTask : Exec() {
     @Nested
     val platformFamily: Property<Family> = project.objects.property(Family::class.java)
 
-    @Nested
+    @Input
     val platformDependency: Property<String> = project.objects.property(String::class.java)
 
     @get:OutputDirectory

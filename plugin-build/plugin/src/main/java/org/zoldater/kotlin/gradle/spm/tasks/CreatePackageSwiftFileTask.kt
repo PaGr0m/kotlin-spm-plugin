@@ -11,6 +11,7 @@ import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
 import org.zoldater.kotlin.gradle.spm.swiftPackageBuildDirs
 import java.io.File
 
+@CacheableTask
 abstract class CreatePackageSwiftFileTask : DefaultTask() {
     init {
         description = "Create package.swift file with content"

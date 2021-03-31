@@ -3,15 +3,13 @@ package org.zoldater.kotlin.gradle.spm.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Nested
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import org.jetbrains.kotlin.konan.target.Family
 import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
 import org.zoldater.kotlin.gradle.spm.swiftPackageBuildDirs
 import java.io.File
 
+@CacheableTask
 abstract class GenerateDefFileTask : DefaultTask() {
     init {
         description = "Create .def file on each platform"

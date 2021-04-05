@@ -452,6 +452,40 @@ class SinglePlatformFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, resultCreatePackageSwiftTask.task(":$createPackageSwiftTaskName")?.outcome)
     }
 
+    /**
+     * Cacheable test
+     */
+    @Test
+    fun `test cache task`() {
+        val resultInitTask = GradleRunner.create()
+            .withProjectDir(testProjectDir.root)
+            .withArguments(initTaskName)
+            .withPluginClasspath()
+            .build()
+
+        val resultInitTaskBeforeClean = GradleRunner.create()
+            .withProjectDir(testProjectDir.root)
+            .withArguments(initTaskName, "--build-cache")
+            .withPluginClasspath()
+            .build()
+
+        val resultCleanTask = GradleRunner.create()
+            .withProjectDir(testProjectDir.root)
+            .withArguments("clean")
+            .withPluginClasspath()
+            .build()
+
+        val resultInitTaskAfterClean = GradleRunner.create()
+            .withProjectDir(testProjectDir.root)
+            .withArguments(initTaskName, "--build-cache")
+            .withPluginClasspath()
+            .build()
+
+        assertEquals(TaskOutcome.SUCCESS, resultInitTask.task(":$initTaskName")?.outcome)
+        assertEquals(TaskOutcome.UP_TO_DATE, resultInitTaskBeforeClean.task(":$initTaskName")?.outcome)
+        assertEquals(TaskOutcome.FROM_CACHE, resultInitTaskAfterClean.task(":$initTaskName")?.outcome)
+    }
+
     private fun initializeTaskOutput(family: Family): String = """
         Creating library package: ${family.name}
         Creating Package.swift

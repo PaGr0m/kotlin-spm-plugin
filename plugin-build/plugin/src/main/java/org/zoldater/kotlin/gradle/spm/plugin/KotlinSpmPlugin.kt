@@ -20,6 +20,8 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         val availablePlatforms = spmExtension.platformsManagerContainer
 
         // Graph task registration (order should not be changed)
+        registerSpmCleanTask(project, availablePlatforms)
+
         registerInitializeSwiftPackageProjectTask(project, availablePlatforms)
         registerCreatePackageSwiftFileTask(project, availablePlatforms)
         registerGenerateXcodeTask(project, availablePlatforms)
@@ -28,8 +30,6 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         registerInteropFrameworkTask(project, availablePlatforms, multiplatformExtension)
         registerBundleXCFrameworkTask(project, availablePlatforms, multiplatformExtension)
         registerArchiveXCFrameworkTask(project)
-
-        registerSpmCleanTask(project, availablePlatforms)
     }
 
     private fun registerSpmCleanTask(
@@ -51,11 +51,18 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
     ) {
         platforms.all { platform ->
+            val cleanSwiftPackageProjectTask = project.tasks.named(
+                "$CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME${platform.family}",
+                CleanSwiftPackageProjectTask::class.java
+            )
+
             project.tasks.register(
                 "$INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME${platform.family}",
                 InitializeSwiftPackageProjectTask::class.java
             ) { task ->
                 task.platformFamily.set(platform.family)
+
+//                task.dependsOn(cleanSwiftPackageProjectTask)
             }
         }
     }
@@ -196,7 +203,9 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
                 platforms.all { platform ->
                     val family = platform.family
                     if (family == mppTarget.konanTarget.family) {
-                        val linkTask = project.tasks.getByName("link" + mppTarget.targetName.capitalize())
+                        val linkTask = project.tasks.getByName(
+                            "linkReleaseFramework" + mppTarget.targetName.capitalize()
+                        )
                         task.dependsOn(linkTask)
                     }
                 }
@@ -216,11 +225,8 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             ARCHIVE_XCFRAMEWORK_TASK_NAME,
             ArchiveXCFramework::class.java
         ) { task ->
-            task.from(project.swiftPackageBuildDirs.root)
-            task.include("./*.xcframework")
-            task.into(project.swiftPackageBuildDirs.root)
-
-            task.xcFramework.set(bundleXCFramework.get())
+            task.from(project.swiftPackageBuildDirs.xcFrameworkDir())
+            task.xcFramework.set(bundleXCFramework.map { it.xcFramework })
 
             task.dependsOn(bundleXCFramework)
         }

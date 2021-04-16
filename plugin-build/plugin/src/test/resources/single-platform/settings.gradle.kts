@@ -1,0 +1,1 @@
+rootProject.name = "single-platform-test-project"

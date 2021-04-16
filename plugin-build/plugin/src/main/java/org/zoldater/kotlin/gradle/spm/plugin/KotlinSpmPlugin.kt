@@ -24,8 +24,8 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         registerGenerateXcodeTask(project, availablePlatforms)
         registerBuildFrameworksTask(project, availablePlatforms)
         registerGenerateDefFileTask(project, availablePlatforms)
-
         registerInteropFrameworkTask(project, availablePlatforms, multiplatformExtension)
+        registerBundleXCFrameworkTask(project, availablePlatforms, multiplatformExtension)
 
         registerSpmCleanTask(project, availablePlatforms)
     }
@@ -181,6 +181,27 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         }
     }
 
+    private fun registerBundleXCFrameworkTask(
+        project: Project,
+        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
+        multiplatformExtension: KotlinMultiplatformExtension,
+    ) {
+        project.tasks.register(
+            BUNDLE_XCFRAMEWORK_TASK_NAME,
+            BundleXCFramework::class.java
+        ) { task ->
+            multiplatformExtension.supportedTargets().all { mppTarget ->
+                platforms.all { platform ->
+                    val family = platform.family
+                    if (family == mppTarget.konanTarget.family) {
+                        val linkTask = project.tasks.named("link" + mppTarget.targetName.capitalize())
+                        task.dependsOn(linkTask)
+                    }
+                }
+            }
+        }
+    }
+
     companion object {
         private const val KOTLIN_PROJECT_EXTENSION_NAME = "kotlin"
         const val MULTIPLATFORM_PLUGIN_NAME = "kotlin-multiplatform"
@@ -193,7 +214,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         const val BUILD_FRAMEWORK_TASK_NAME = "buildFrameworks"
         const val GENERATE_DEF_FILE_TASK_NAME = "generateDefFile"
         const val CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME = "cleanSwiftPackageProject"
-        const val INTEROP_FRAMEWORK_TASK_NAME = "interopFramework"
+        const val BUNDLE_XCFRAMEWORK_TASK_NAME = "bundleXCFramework"
 
         private fun KotlinMultiplatformExtension.supportedTargets() = targets
             .withType(KotlinNativeTarget::class.java)

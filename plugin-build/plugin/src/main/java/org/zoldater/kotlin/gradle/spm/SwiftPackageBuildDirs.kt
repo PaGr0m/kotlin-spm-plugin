@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.konan.target.Family
 import java.io.File
 
 class SwiftPackageBuildDirs(private val project: Project) {
-    private val root: File
+    val root: File
         get() = project.buildDir.resolve(ROOT_DIRECTORY)
 
     fun platformRoot(family: Family): File = root.resolve(family.name)

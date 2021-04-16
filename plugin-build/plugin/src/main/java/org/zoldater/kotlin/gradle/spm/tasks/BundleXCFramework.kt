@@ -23,7 +23,9 @@ abstract class BundleXCFramework : Exec() {
     val xcFramework: File = project.swiftPackageBuildDirs.root.resolve("all.xcframework")
 
     override fun exec() {
-        Files.delete(xcFramework.toPath())
+        if (xcFramework.exists()) {
+            Files.delete(xcFramework.toPath())
+        }
 
         workingDir = project.swiftPackageBuildDirs.root
         commandLine("xcodebuild", "-create-xcframework")

@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.zoldater.kotlin.gradle.spm.entity.impl.PlatformManager
+import org.zoldater.kotlin.gradle.spm.swiftPackageBuildDirs
 import org.zoldater.kotlin.gradle.spm.tasks.*
 
 abstract class KotlinSpmPlugin : Plugin<Project> {
@@ -26,6 +27,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         registerGenerateDefFileTask(project, availablePlatforms)
         registerInteropFrameworkTask(project, availablePlatforms, multiplatformExtension)
         registerBundleXCFrameworkTask(project, availablePlatforms, multiplatformExtension)
+        registerArchiveXCFrameworkTask(project)
 
         registerSpmCleanTask(project, availablePlatforms)
     }
@@ -194,11 +196,33 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
                 platforms.all { platform ->
                     val family = platform.family
                     if (family == mppTarget.konanTarget.family) {
-                        val linkTask = project.tasks.named("link" + mppTarget.targetName.capitalize())
+                        val linkTask = project.tasks.getByName("link" + mppTarget.targetName.capitalize())
                         task.dependsOn(linkTask)
                     }
                 }
             }
+        }
+    }
+
+    private fun registerArchiveXCFrameworkTask(
+        project: Project,
+    ) {
+        val bundleXCFramework = project.tasks.named(
+            BUNDLE_XCFRAMEWORK_TASK_NAME,
+            BundleXCFramework::class.java
+        )
+
+        project.tasks.register(
+            ARCHIVE_XCFRAMEWORK_TASK_NAME,
+            ArchiveXCFramework::class.java
+        ) { task ->
+            task.from(project.swiftPackageBuildDirs.root)
+            task.include("./*.xcframework")
+            task.into(project.swiftPackageBuildDirs.root)
+
+            task.xcFramework.set(bundleXCFramework.get())
+
+            task.dependsOn(bundleXCFramework)
         }
     }
 
@@ -215,6 +239,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         const val GENERATE_DEF_FILE_TASK_NAME = "generateDefFile"
         const val CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME = "cleanSwiftPackageProject"
         const val BUNDLE_XCFRAMEWORK_TASK_NAME = "bundleXCFramework"
+        const val ARCHIVE_XCFRAMEWORK_TASK_NAME = "archiveXCFramework"
 
         private fun KotlinMultiplatformExtension.supportedTargets() = targets
             .withType(KotlinNativeTarget::class.java)

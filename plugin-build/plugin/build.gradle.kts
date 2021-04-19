@@ -12,6 +12,10 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN")
     implementation("org.jetbrains.kotlin:kotlin-native-utils:$KOTLIN")
 
+    implementation ("org.eclipse.jgit:org.eclipse.jgit")
+    implementation ("org.eclipse.jgit:org.eclipse.jgit.archive")
+    implementation ("org.eclipse.jgit:org.eclipse.jgit.ssh.jsch")
+
     testImplementation(TestingLib.JUNIT)
 }
 

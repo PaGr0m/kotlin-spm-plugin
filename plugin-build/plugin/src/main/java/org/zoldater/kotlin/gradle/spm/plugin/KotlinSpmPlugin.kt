@@ -30,6 +30,8 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         registerInteropFrameworkTask(project, availablePlatforms, multiplatformExtension)
         registerBundleXCFrameworkTask(project, availablePlatforms, multiplatformExtension)
         registerArchiveXCFrameworkTask(project)
+
+        registerPublishXCFramework(project)
     }
 
     private fun registerSpmCleanTask(
@@ -229,6 +231,16 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             task.xcFramework.set(bundleXCFramework.map { it.xcFramework })
 
             task.dependsOn(bundleXCFramework)
+        }
+    }
+
+    private fun registerPublishXCFramework(
+        project: Project
+    ) {
+        project.tasks.register(
+            "publishXC",
+            PublishXCFramework::class.java
+        ) { task ->
         }
     }
 

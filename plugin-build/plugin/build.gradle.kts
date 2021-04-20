@@ -12,9 +12,11 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN")
     implementation("org.jetbrains.kotlin:kotlin-native-utils:$KOTLIN")
 
-    implementation ("org.eclipse.jgit:org.eclipse.jgit")
-    implementation ("org.eclipse.jgit:org.eclipse.jgit.archive")
-    implementation ("org.eclipse.jgit:org.eclipse.jgit.ssh.jsch")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:5.10.0.202012080955-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit.archive:5.10.0.202012080955-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:5.10.0.202012080955-r")
+    implementation("commons-io:commons-io:2.8.0")
+    implementation("org.slf4j:slf4j-simple:1.7.30")
 
     testImplementation(TestingLib.JUNIT)
 }

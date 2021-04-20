@@ -31,7 +31,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         registerBundleXCFrameworkTask(project, availablePlatforms, multiplatformExtension)
         registerArchiveXCFrameworkTask(project)
 
-        registerPublishXCFramework(project)
+        registerPublishXCFramework(project, availablePlatforms)
     }
 
     private fun registerSpmCleanTask(
@@ -53,18 +53,11 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
     ) {
         platforms.all { platform ->
-            val cleanSwiftPackageProjectTask = project.tasks.named(
-                "$CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME${platform.family}",
-                CleanSwiftPackageProjectTask::class.java
-            )
-
             project.tasks.register(
                 "$INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME${platform.family}",
                 InitializeSwiftPackageProjectTask::class.java
             ) { task ->
                 task.platformFamily.set(platform.family)
-
-//                task.dependsOn(cleanSwiftPackageProjectTask)
             }
         }
     }
@@ -218,7 +211,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
     private fun registerArchiveXCFrameworkTask(
         project: Project,
     ) {
-        val bundleXCFramework = project.tasks.named(
+        val bundleXCFrameworkTask = project.tasks.named(
             BUNDLE_XCFRAMEWORK_TASK_NAME,
             BundleXCFramework::class.java
         )
@@ -228,19 +221,30 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             ArchiveXCFramework::class.java
         ) { task ->
             task.from(project.swiftPackageBuildDirs.xcFrameworkDir())
-            task.xcFramework.set(bundleXCFramework.map { it.xcFramework })
+            task.xcFramework.set(bundleXCFrameworkTask.map { it.xcFramework })
 
-            task.dependsOn(bundleXCFramework)
+            task.dependsOn(bundleXCFrameworkTask)
         }
     }
 
+    @Suppress("UnstableApiUsage")
     private fun registerPublishXCFramework(
-        project: Project
+        project: Project,
+        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
     ) {
+        val archiveXCFrameworkTask = project.tasks.named(
+            ARCHIVE_XCFRAMEWORK_TASK_NAME,
+            ArchiveXCFramework::class.java
+        )
+
         project.tasks.register(
-            "publishXC",
+            PUBLISH_XCFRAMEWORK_TASK_NAME,
             PublishXCFramework::class.java
         ) { task ->
+            task.archiveXCFramework.set(archiveXCFrameworkTask.flatMap { it.archiveFile })
+            task.family.set(platforms.map { it.family }.random())
+
+            task.dependsOn(archiveXCFrameworkTask)
         }
     }
 
@@ -258,6 +262,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         const val CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME = "cleanSwiftPackageProject"
         const val BUNDLE_XCFRAMEWORK_TASK_NAME = "bundleXCFramework"
         const val ARCHIVE_XCFRAMEWORK_TASK_NAME = "archiveXCFramework"
+        const val PUBLISH_XCFRAMEWORK_TASK_NAME = "publishXCFramework"
 
         private fun KotlinMultiplatformExtension.supportedTargets() = targets
             .withType(KotlinNativeTarget::class.java)

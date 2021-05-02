@@ -46,7 +46,7 @@ class PlatformManager {
         abstract val family: Family
 
         @Input
-        lateinit var name: String
+        val name: String = "spm"
 
         private val platformsContainer = project.container(SupportedPlatformManager.SupportedPlatform::class.java)
         private val productsContainer = project.container(Product::class.java)

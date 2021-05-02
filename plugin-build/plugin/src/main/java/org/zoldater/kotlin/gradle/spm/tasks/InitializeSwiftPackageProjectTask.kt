@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.konan.target.Family
 import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
 import org.zoldater.kotlin.gradle.spm.swiftPackageBuildDirs
 import java.io.File
+import java.nio.file.Files
 
 @CacheableTask
 abstract class InitializeSwiftPackageProjectTask : Exec() {
@@ -35,7 +36,7 @@ abstract class InitializeSwiftPackageProjectTask : Exec() {
 
     override fun exec() {
         workingDir = platformRootDirectory.get()
-        workingDir.mkdirs()
+        Files.createDirectories(workingDir.toPath())
 
         commandLine("swift", "package", "init")
         super.exec()

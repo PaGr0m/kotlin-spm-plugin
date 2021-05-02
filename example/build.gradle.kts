@@ -21,15 +21,8 @@ kotlin {
         }
     }
 
-    sourceSets {
-        val commonMain by getting
-        val iosArm64Main by getting
-        val macosX64Main by getting
-    }
-
     spm {
         ios("11") {
-            name = "ios example"
             dependencies {
                 `package`(
                     url = "https://github.com/johnsundell/files.git",
@@ -40,7 +33,6 @@ kotlin {
         }
 
         macos("11") {
-            name = "tvos example"
             dependencies {
                 `package`(
                     url = "https://github.com/AFNetworking/AFNetworking.git",

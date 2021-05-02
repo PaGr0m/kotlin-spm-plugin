@@ -1,5 +1,6 @@
 package org.zoldater.kotlin.gradle.spm.tasks
 
+import groovy.text.SimpleTemplateEngine
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.transport.CredentialsProvider
@@ -15,6 +16,7 @@ import org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin
 import org.zoldater.kotlin.gradle.spm.swiftPackageBuildDirs
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.nio.file.Files
 import java.util.*
 
 @Suppress("UnstableApiUsage")
@@ -25,6 +27,8 @@ abstract class PublishXCFramework : Exec() {
         group = KotlinSpmPlugin.TASK_GROUP
     }
 
+    private val binaryTargetPackageTemplateContent = this::class.java.getResource("/BinaryPackage.swift").readText()
+
     @InputFile
     val archiveXCFramework: Property<RegularFile> = project.objects.fileProperty()
 
@@ -32,6 +36,21 @@ abstract class PublishXCFramework : Exec() {
     val family: Property<Family> = project.objects.property(Family::class.java)
 
     override fun exec() {
+        // Create synthetic Swift Package project if not exist
+        var syntheticFamily = false
+
+        val familyDirectory = project.swiftPackageBuildDirs.platformRoot(family.get())
+        if (!familyDirectory.exists()) {
+            workingDir = familyDirectory
+            Files.createDirectories(workingDir.toPath())
+
+            commandLine("swift", "package", "init")
+            super.exec()
+
+            syntheticFamily = true
+        }
+
+        // Compute checksum
         val archive = archiveXCFramework.get().asFile
 
         standardOutput = ByteArrayOutputStream()
@@ -41,28 +60,40 @@ abstract class PublishXCFramework : Exec() {
         )
 
         super.exec()
-
         val checksum = standardOutput.toString()
 
+        // Collect properties
         val properties = Properties().apply {
             load(project.rootProject.file("local.properties").inputStream())
         }
+
+        val gitUrl = properties.getProperty("git.credentials.giturl")
+        val archiveUrl = "${gitUrl.removeSuffix(".git")}/blob/master/generated/KotlinLibrary.xcframework.zip"
+
+        // Create Package.swift example file
+        val binding = mapOf(
+            "CHECK_SUM" to checksum,
+            "ARCHIVE_XCFRAMEWORK_LIBRARY" to archiveUrl
+        )
+        val engine = SimpleTemplateEngine()
+        val template = engine.createTemplate(binaryTargetPackageTemplateContent).make(binding)
 
         val credentials = UsernamePasswordCredentialsProvider(
             properties.getProperty("git.credentials.username"),
             properties.getProperty("git.credentials.password")
         )
+        gitActions(credentials, gitUrl, archive, template.toString())
 
-        val gitUrl = properties.getProperty("git.credentials.giturl")
-
-        gitActions(credentials, gitUrl, archive, checksum)
+        if (syntheticFamily) {
+            familyDirectory.deleteRecursively()
+        }
     }
 
     private fun gitActions(
         credentials: CredentialsProvider,
         gitUrl: String,
         xcFrameworkArchive: File,
-        checksum: String
+        templateContent: String
     ) {
         val gitTemporaryFolder = project.swiftPackageBuildDirs.gitDir()
         gitTemporaryFolder.deleteRecursively()
@@ -72,17 +103,18 @@ abstract class PublishXCFramework : Exec() {
             .setURI(gitUrl)
             .call()
 
+        val generatedDirectory = gitTemporaryFolder.resolve("generated")
+
         FileUtils.copyFile(
             xcFrameworkArchive,
-            gitTemporaryFolder.resolve(xcFrameworkArchive.name)
+            generatedDirectory.resolve(xcFrameworkArchive.name)
         )
 
-        val readme = gitTemporaryFolder.resolve("readme.md")
-        readme.writeText("Checksum = $checksum")
+        val binaryPackageSwift = Files.createFile(generatedDirectory.resolve("Package.swift").toPath()).toFile()
+        binaryPackageSwift.writeText(templateContent)
 
         git.add()
-            .addFilepattern(xcFrameworkArchive.name)
-            .addFilepattern(readme.name)
+            .addFilepattern(generatedDirectory.name)
             .call()
 
         git.commit()
@@ -92,6 +124,8 @@ abstract class PublishXCFramework : Exec() {
         git.push()
             .setCredentialsProvider(credentials)
             .call()
+
+        gitTemporaryFolder.deleteRecursively()
     }
 
     companion object {

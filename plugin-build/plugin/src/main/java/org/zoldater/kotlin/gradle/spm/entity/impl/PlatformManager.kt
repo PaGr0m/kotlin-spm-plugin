@@ -46,7 +46,7 @@ class PlatformManager {
         abstract val family: Family
 
         @Input
-        val name: String = "spm"
+        val name: String = family.name
 
         private val platformsContainer = project.container(SupportedPlatformManager.SupportedPlatform::class.java)
         private val productsContainer = project.container(Product::class.java)

@@ -22,16 +22,6 @@ kotlin {
     }
 
     spm {
-        ios("11") {
-            dependencies {
-                `package`(
-                    url = "https://github.com/johnsundell/files.git",
-                    version = "4.0.0",
-                    name = "Files"
-                )
-            }
-        }
-
         macos("11") {
             dependencies {
                 `package`(
@@ -43,6 +33,16 @@ kotlin {
                     url = "https://github.com/Alamofire/Alamofire.git",
                     version = "5.2.0",
                     name = "Alamofire"
+                )
+            }
+        }
+
+        ios("11") {
+            dependencies {
+                `package`(
+                    url = "https://github.com/johnsundell/files.git",
+                    version = "4.0.0",
+                    name = "Files"
                 )
             }
         }

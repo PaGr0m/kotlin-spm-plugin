@@ -20,7 +20,8 @@ abstract class BundleXCFramework : Exec() {
     val targetsRoot: File = project.buildDir.resolve("bin")
 
     @get:OutputDirectory
-    val xcFramework: File = project.swiftPackageBuildDirs.xcFrameworkDir().resolve("all.xcframework")
+    val xcFramework: File = project.swiftPackageBuildDirs.xcFrameworkDir()
+        .resolve("$XCFRAMEWORK_NAME.xcframework")
 
     override fun exec() {
         if (xcFramework.exists()) {
@@ -40,13 +41,15 @@ abstract class BundleXCFramework : Exec() {
             .filter { it.extension == "dSYM" }
             .toList()
 
-        frameworks.zip(dSYMs).forEach { (framework, dSYM) ->
-            args("-framework", framework.absolutePath)
-            args("-debug-symbols", dSYM.absolutePath)
-        }
+        frameworks.forEach { args("-framework", it.absolutePath) }
+        dSYMs.forEach { args("-debug-symbols", it.absolutePath) }
 
         args("-output", xcFramework)
 
         super.exec()
+    }
+
+    private companion object {
+        private const val XCFRAMEWORK_NAME = "KotlinLibrary"
     }
 }

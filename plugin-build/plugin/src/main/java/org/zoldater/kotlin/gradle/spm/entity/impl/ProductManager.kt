@@ -3,12 +3,14 @@ package org.zoldater.kotlin.gradle.spm.entity.impl
 import groovy.lang.Closure
 import org.gradle.util.ConfigureUtil
 import org.zoldater.kotlin.gradle.spm.entity.Product
+import org.zoldater.kotlin.gradle.spm.entity.ProductMarker
 import org.zoldater.kotlin.gradle.spm.utils.StringUnaryPlusContainer
 
 /**
  * @see [Product](https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html#product)
  * @see [Product](https://github.com/apple/swift-package-manager/blob/main/Documentation/PackageDescription.md#product)
  */
+@ProductMarker
 class ProductManager {
     val products = mutableListOf<Product>()
 

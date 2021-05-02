@@ -1,12 +1,14 @@
 package org.zoldater.kotlin.gradle.spm.entity.impl
 
 import org.zoldater.kotlin.gradle.spm.entity.TargetDependency
+import org.zoldater.kotlin.gradle.spm.entity.TargetDependencyMarker
 import org.zoldater.kotlin.gradle.spm.entity.impl.TargetDependencyManager.Target
 
 /**
  * @see [Target.Dependency](https://github.com/apple/swift-package-manager/blob/main/Documentation/PackageDescription.md#target-dependency)
  * @see [Target.Dependency](https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html#target-dependency)
  */
+@TargetDependencyMarker
 class TargetDependencyManager {
     val targetDependencies = mutableListOf<TargetDependency>()
 

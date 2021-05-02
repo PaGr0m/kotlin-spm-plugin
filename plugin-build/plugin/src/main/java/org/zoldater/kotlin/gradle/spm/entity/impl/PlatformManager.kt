@@ -6,10 +6,12 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.util.ConfigureUtil
 import org.jetbrains.kotlin.konan.target.Family
+import org.zoldater.kotlin.gradle.spm.entity.PlatformMarker
 import org.zoldater.kotlin.gradle.spm.entity.Product
 import org.zoldater.kotlin.gradle.spm.entity.Target
 import javax.inject.Inject
 
+@PlatformMarker
 class PlatformManager {
     class PlatformIosManager(
         override val version: String,
@@ -44,7 +46,7 @@ class PlatformManager {
         abstract val family: Family
 
         @Input
-        lateinit var name: String
+        val name: String = "spm"
 
         private val platformsContainer = project.container(SupportedPlatformManager.SupportedPlatform::class.java)
         private val productsContainer = project.container(Product::class.java)

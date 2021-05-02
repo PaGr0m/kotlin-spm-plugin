@@ -1,10 +1,9 @@
 package org.zoldater.kotlin.gradle.spm.plugin
 
-import org.junit.Assert.*
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.kotlin.konan.target.Family
-import org.junit.Assert.assertNotEquals
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

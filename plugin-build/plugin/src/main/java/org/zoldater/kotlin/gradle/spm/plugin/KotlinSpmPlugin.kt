@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.zoldater.kotlin.gradle.spm.entity.impl.PlatformManager
+import org.zoldater.kotlin.gradle.spm.swiftPackageBuildDirs
 import org.zoldater.kotlin.gradle.spm.tasks.*
 
 abstract class KotlinSpmPlugin : Plugin<Project> {
@@ -19,15 +20,18 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         val availablePlatforms = spmExtension.platformsManagerContainer
 
         // Graph task registration (order should not be changed)
+        registerSpmCleanTask(project, availablePlatforms)
+
         registerInitializeSwiftPackageProjectTask(project, availablePlatforms)
         registerCreatePackageSwiftFileTask(project, availablePlatforms)
         registerGenerateXcodeTask(project, availablePlatforms)
         registerBuildFrameworksTask(project, availablePlatforms)
         registerGenerateDefFileTask(project, availablePlatforms)
-
         registerInteropFrameworkTask(project, availablePlatforms, multiplatformExtension)
+        registerBundleXCFrameworkTask(project, availablePlatforms, multiplatformExtension)
+        registerArchiveXCFrameworkTask(project)
 
-        registerSpmCleanTask(project, availablePlatforms)
+        registerPublishXCFramework(project, availablePlatforms)
     }
 
     private fun registerSpmCleanTask(
@@ -181,6 +185,69 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         }
     }
 
+    private fun registerBundleXCFrameworkTask(
+        project: Project,
+        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
+        multiplatformExtension: KotlinMultiplatformExtension,
+    ) {
+        project.tasks.register(
+            BUNDLE_XCFRAMEWORK_TASK_NAME,
+            BundleXCFramework::class.java
+        ) { task ->
+            multiplatformExtension.supportedTargets().all { mppTarget ->
+                platforms.all { platform ->
+                    val family = platform.family
+                    if (family == mppTarget.konanTarget.family) {
+                        val linkTask = project.tasks.getByName(
+                            "linkReleaseFramework" + mppTarget.targetName.capitalize()
+                        )
+                        task.dependsOn(linkTask)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun registerArchiveXCFrameworkTask(
+        project: Project,
+    ) {
+        val bundleXCFrameworkTask = project.tasks.named(
+            BUNDLE_XCFRAMEWORK_TASK_NAME,
+            BundleXCFramework::class.java
+        )
+
+        project.tasks.register(
+            ARCHIVE_XCFRAMEWORK_TASK_NAME,
+            ArchiveXCFramework::class.java
+        ) { task ->
+            task.from(project.swiftPackageBuildDirs.xcFrameworkDir())
+            task.xcFramework.set(bundleXCFrameworkTask.map { it.xcFramework })
+
+            task.dependsOn(bundleXCFrameworkTask)
+        }
+    }
+
+    @Suppress("UnstableApiUsage")
+    private fun registerPublishXCFramework(
+        project: Project,
+        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
+    ) {
+        val archiveXCFrameworkTask = project.tasks.named(
+            ARCHIVE_XCFRAMEWORK_TASK_NAME,
+            ArchiveXCFramework::class.java
+        )
+
+        project.tasks.register(
+            PUBLISH_XCFRAMEWORK_TASK_NAME,
+            PublishXCFramework::class.java
+        ) { task ->
+            task.archiveXCFramework.set(archiveXCFrameworkTask.flatMap { it.archiveFile })
+            task.family.set(platforms.map { it.family }.random())
+
+            task.dependsOn(archiveXCFrameworkTask)
+        }
+    }
+
     companion object {
         private const val KOTLIN_PROJECT_EXTENSION_NAME = "kotlin"
         const val MULTIPLATFORM_PLUGIN_NAME = "kotlin-multiplatform"
@@ -193,7 +260,9 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         const val BUILD_FRAMEWORK_TASK_NAME = "buildFrameworks"
         const val GENERATE_DEF_FILE_TASK_NAME = "generateDefFile"
         const val CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME = "cleanSwiftPackageProject"
-        const val INTEROP_FRAMEWORK_TASK_NAME = "interopFramework"
+        const val BUNDLE_XCFRAMEWORK_TASK_NAME = "bundleXCFramework"
+        const val ARCHIVE_XCFRAMEWORK_TASK_NAME = "archiveXCFramework"
+        const val PUBLISH_XCFRAMEWORK_TASK_NAME = "publishXCFramework"
 
         private fun KotlinMultiplatformExtension.supportedTargets() = targets
             .withType(KotlinNativeTarget::class.java)

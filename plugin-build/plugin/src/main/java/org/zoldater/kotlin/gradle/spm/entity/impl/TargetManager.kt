@@ -7,12 +7,14 @@ import org.gradle.api.tasks.Optional
 import org.gradle.util.ConfigureUtil
 import org.zoldater.kotlin.gradle.spm.entity.Target
 import org.zoldater.kotlin.gradle.spm.entity.TargetDependency
+import org.zoldater.kotlin.gradle.spm.entity.TargetMarker
 import org.zoldater.kotlin.gradle.spm.utils.StringUnaryPlusContainer
 
 /**
  * @see [Target](https://github.com/apple/swift-package-manager/blob/main/Documentation/PackageDescription.md#target)
  * @see [Target](https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html#target)
  */
+@TargetMarker
 class TargetManager {
     val targets = mutableListOf<Target>()
 

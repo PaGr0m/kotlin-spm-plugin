@@ -2,10 +2,7 @@ package com.pagrom.kotlin.gradle.spm.tasks
 
 import com.pagrom.kotlin.gradle.spm.plugin.KotlinSpmPlugin
 import com.pagrom.kotlin.gradle.spm.swiftPackageBuildDirs
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Exec
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.*
 import java.io.File
 import java.nio.file.Files
 
@@ -17,6 +14,7 @@ abstract class BundleXCFramework : Exec() {
     }
 
     @InputDirectory
+    @PathSensitive(PathSensitivity.ABSOLUTE)
     val targetsRoot: File = project.buildDir.resolve("bin")
 
     @get:OutputDirectory

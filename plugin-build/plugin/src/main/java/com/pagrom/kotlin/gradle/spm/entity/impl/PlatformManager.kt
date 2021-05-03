@@ -1,14 +1,14 @@
 package com.pagrom.kotlin.gradle.spm.entity.impl
 
+import com.pagrom.kotlin.gradle.spm.entity.PlatformMarker
+import com.pagrom.kotlin.gradle.spm.entity.Product
+import com.pagrom.kotlin.gradle.spm.entity.Target
 import groovy.lang.Closure
 import org.gradle.api.Project
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.util.ConfigureUtil
 import org.jetbrains.kotlin.konan.target.Family
-import com.pagrom.kotlin.gradle.spm.entity.PlatformMarker
-import com.pagrom.kotlin.gradle.spm.entity.Product
-import com.pagrom.kotlin.gradle.spm.entity.Target
 import javax.inject.Inject
 
 @PlatformMarker

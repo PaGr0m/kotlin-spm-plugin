@@ -1,10 +1,10 @@
 package com.pagrom.kotlin.gradle.spm.entity.impl
 
+import com.pagrom.kotlin.gradle.spm.entity.DependencyMarker
+import com.pagrom.kotlin.gradle.spm.entity.impl.DependencyManager.Package
 import org.gradle.api.Named
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
-import com.pagrom.kotlin.gradle.spm.entity.DependencyMarker
-import com.pagrom.kotlin.gradle.spm.entity.impl.DependencyManager.Package
 
 /**
  * @see [Package.Dependency](https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html#package-dependency)

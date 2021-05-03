@@ -1,10 +1,10 @@
 package com.pagrom.kotlin.gradle.spm.plugin
 
+import com.pagrom.kotlin.gradle.spm.entity.impl.PlatformManager
 import groovy.lang.Closure
 import org.gradle.api.Project
 import org.gradle.api.tasks.Nested
 import org.gradle.util.ConfigureUtil
-import com.pagrom.kotlin.gradle.spm.entity.impl.PlatformManager
 import javax.inject.Inject
 
 @Suppress("UnnecessaryAbstractClass")
@@ -48,5 +48,4 @@ abstract class KotlinSpmExtension @Inject constructor(private val project: Proje
     fun watchos(version: String, configure: Closure<*>) = ios(version) {
         ConfigureUtil.configure(configure, this)
     }
-
 }

@@ -1,10 +1,10 @@
 package com.pagrom.kotlin.gradle.spm.entity.impl
 
-import groovy.lang.Closure
-import org.gradle.util.ConfigureUtil
 import com.pagrom.kotlin.gradle.spm.entity.Product
 import com.pagrom.kotlin.gradle.spm.entity.ProductMarker
 import com.pagrom.kotlin.gradle.spm.utils.StringUnaryPlusContainer
+import groovy.lang.Closure
+import org.gradle.util.ConfigureUtil
 
 /**
  * @see [Product](https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html#product)

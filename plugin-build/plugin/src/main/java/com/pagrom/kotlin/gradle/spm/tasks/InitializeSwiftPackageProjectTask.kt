@@ -1,11 +1,11 @@
 package com.pagrom.kotlin.gradle.spm.tasks
 
+import com.pagrom.kotlin.gradle.spm.plugin.KotlinSpmPlugin
+import com.pagrom.kotlin.gradle.spm.swiftPackageBuildDirs
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.jetbrains.kotlin.konan.target.Family
-import com.pagrom.kotlin.gradle.spm.plugin.KotlinSpmPlugin
-import com.pagrom.kotlin.gradle.spm.swiftPackageBuildDirs
 import java.io.File
 import java.nio.file.Files
 

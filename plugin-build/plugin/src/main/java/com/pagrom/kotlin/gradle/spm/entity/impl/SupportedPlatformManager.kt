@@ -1,11 +1,11 @@
 package com.pagrom.kotlin.gradle.spm.entity.impl
 
+import com.pagrom.kotlin.gradle.spm.entity.SupportedProductMarker
+import com.pagrom.kotlin.gradle.spm.entity.impl.SupportedPlatformManager.SupportedPlatform
 import org.gradle.api.Named
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.jetbrains.kotlin.konan.target.Family
-import com.pagrom.kotlin.gradle.spm.entity.SupportedProductMarker
-import com.pagrom.kotlin.gradle.spm.entity.impl.SupportedPlatformManager.SupportedPlatform
 
 /**
  * @see [SupportedPlatform](https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html#supportedplatform)

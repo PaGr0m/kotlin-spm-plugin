@@ -1,14 +1,14 @@
 package com.pagrom.kotlin.gradle.spm.plugin
 
+import com.pagrom.kotlin.gradle.spm.entity.impl.PlatformManager
+import com.pagrom.kotlin.gradle.spm.swiftPackageBuildDirs
+import com.pagrom.kotlin.gradle.spm.tasks.*
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import com.pagrom.kotlin.gradle.spm.entity.impl.PlatformManager
-import com.pagrom.kotlin.gradle.spm.swiftPackageBuildDirs
-import com.pagrom.kotlin.gradle.spm.tasks.*
 
 abstract class KotlinSpmPlugin : Plugin<Project> {
 

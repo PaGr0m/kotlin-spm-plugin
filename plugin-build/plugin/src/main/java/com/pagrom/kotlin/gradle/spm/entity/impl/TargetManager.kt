@@ -1,14 +1,14 @@
 package com.pagrom.kotlin.gradle.spm.entity.impl
 
+import com.pagrom.kotlin.gradle.spm.entity.Target
+import com.pagrom.kotlin.gradle.spm.entity.TargetDependency
+import com.pagrom.kotlin.gradle.spm.entity.TargetMarker
+import com.pagrom.kotlin.gradle.spm.utils.StringUnaryPlusContainer
 import groovy.lang.Closure
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.util.ConfigureUtil
-import com.pagrom.kotlin.gradle.spm.entity.Target
-import com.pagrom.kotlin.gradle.spm.entity.TargetDependency
-import com.pagrom.kotlin.gradle.spm.entity.TargetMarker
-import com.pagrom.kotlin.gradle.spm.utils.StringUnaryPlusContainer
 
 /**
  * @see [Target](https://github.com/apple/swift-package-manager/blob/main/Documentation/PackageDescription.md#target)

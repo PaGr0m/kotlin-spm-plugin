@@ -9,10 +9,7 @@ import org.eclipse.jgit.transport.CredentialsProvider
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Exec
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.*
 import org.jetbrains.kotlin.konan.target.Family
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -30,6 +27,7 @@ abstract class PublishXCFramework : Exec() {
     private val binaryTargetPackageTemplateContent = this::class.java.getResource("/BinaryPackage.swift")!!.readText()
 
     @InputFile
+    @PathSensitive(PathSensitivity.ABSOLUTE)
     val archiveXCFramework: Property<RegularFile> = project.objects.fileProperty()
 
     @Input

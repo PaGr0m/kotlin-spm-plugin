@@ -1,8 +1,8 @@
 object PluginCoordinates {
-    const val ID = "org.zoldater.kotlin.gradle.spm.plugin"
-    const val GROUP = "org.zoldater.kotlin.gradle.spm"
+    const val ID = "com.pagrom.kotlin.gradle.spm.plugin"
+    const val GROUP = "com.pagrom.kotlin.gradle.spm"
     const val VERSION = "1.0.0"
-    const val IMPLEMENTATION_CLASS = "org.zoldater.kotlin.gradle.spm.plugin.KotlinSpmPlugin"
+    const val IMPLEMENTATION_CLASS = "com.pagrom.kotlin.gradle.spm.plugin.KotlinSpmPlugin"
 }
 
 object PluginBundle {

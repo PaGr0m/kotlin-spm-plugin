@@ -1,7 +1,7 @@
 plugins {
     java
     kotlin("multiplatform")
-    id("org.zoldater.kotlin.gradle.spm.plugin")
+    id("com.pagrom.kotlin.gradle.spm.plugin")
 }
 
 kotlin {

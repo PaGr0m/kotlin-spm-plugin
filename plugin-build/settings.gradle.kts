@@ -6,6 +6,6 @@ pluginManagement {
     }
 }
 
-rootProject.name = ("org.zoldater.kotlin.gradle.spm")
+rootProject.name = ("com.pagrom.kotlin.gradle.spm")
 
 include(":plugin")

@@ -1,9 +1,15 @@
 import spm.AFNetworking.*
 
-class ExampleMacOS {
-    fun foo() {
-        println(AFNetworkReachabilityStatus.MAX_VALUE)
-    }
+class ExampleMacOS : ExampleInterface {
+    override fun hello() : String = "Hello from MacOS"
 
-    fun bar() : String = "Hello from MacOS"
+    override fun getManager() : AFHTTPSessionManager {
+        return AFHTTPSessionManager.manager()
+    }
+}
+
+interface ExampleInterface {
+    fun hello() : String
+
+    fun getManager() : AFHTTPSessionManager
 }

@@ -1,9 +1,9 @@
 import spm.AFNetworking.*
 
-class ExampleMacOS : ExampleInterface {
-    override fun hello() : String = "Hello from MacOS"
+class ExampleMacOS {
+    fun hello() : String = "Hello MacOS from Kotlin"
 
-    override fun getManager() : AFHTTPSessionManager {
+    fun getManager() : AFHTTPSessionManager {
         return AFHTTPSessionManager.manager()
     }
 }

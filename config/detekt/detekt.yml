@@ -35,9 +35,9 @@ console-reports:
 output-reports:
   active: true
   exclude:
-  # - 'TxtOutputReport'
-  # - 'XmlOutputReport'
-  # - 'HtmlOutputReport'
+#   - 'TxtOutputReport'
+#   - 'XmlOutputReport'
+#   - 'HtmlOutputReport'
 
 comments:
   active: true
@@ -306,12 +306,12 @@ formatting:
     active: true
     autoCorrect: true
   NoWildcardImports:
-    active: true
+    active: false
   PackageName:
     active: true
     autoCorrect: true
   ParameterListWrapping:
-    active: true
+    active: false
     autoCorrect: true
     indentSize: 4
   SpacingAroundColon:
@@ -678,4 +678,4 @@ style:
   WildcardImport:
     active: false
     excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**' ]
-    excludeImports: [ 'java.util.*', 'kotlinx.android.synthetic.*' ]
+    excludeImports: [ 'java.util.*', 'org.junit.Assert.*', 'kotlinx.android.synthetic.*' ]

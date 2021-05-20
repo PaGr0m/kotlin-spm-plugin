@@ -23,12 +23,16 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         // Graph task registration (order should not be changed)
         registerSpmCleanTask(project, availablePlatforms)
 
+        // Integration Swift Package dependency to Kotlin
         registerInitializeSwiftPackageProjectTask(project, availablePlatforms)
         registerCreatePackageSwiftFileTask(project, availablePlatforms)
         registerGenerateXcodeTask(project, availablePlatforms)
         registerBuildFrameworksTask(project, availablePlatforms)
         registerGenerateDefFileTask(project, availablePlatforms)
         registerInteropFrameworkTask(project, availablePlatforms, multiplatformExtension)
+        registerSpmImportTask(project, availablePlatforms, multiplatformExtension)
+
+        // Integration Kotlin library as Swift Package to Xcode project
         registerBundleXCFrameworkTask(project, availablePlatforms, multiplatformExtension)
         registerArchiveXCFrameworkTask(project)
         registerPublishXCFramework(project, availablePlatforms)
@@ -185,6 +189,33 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         }
     }
 
+    private fun registerSpmImportTask(
+        project: Project,
+        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
+        multiplatformExtension: KotlinMultiplatformExtension,
+    ) {
+        project.tasks.register(
+            SPM_IMPORT_TASK_NAME,
+            SpmImport::class.java
+        ) { task ->
+            multiplatformExtension.supportedTargets().all { mppTarget ->
+                platforms.all { platform ->
+                    val family = platform.family
+                    if (family == mppTarget.konanTarget.family) {
+                        platform.dependenciesContainer.all { dependency ->
+                            val cinteropTask = project.tasks.getByName(
+                                "cinterop${dependency.dependencyName}${mppTarget.targetName.capitalize()}"
+                            )
+                            if (cinteropTask.group == TASK_GROUP) {
+                                task.dependsOn(cinteropTask)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun registerBundleXCFrameworkTask(
         project: Project,
         platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
@@ -254,12 +285,15 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         const val SPM_EXTENSION_NAME = "spm"
         const val TASK_GROUP = "swift package manager"
 
+        const val CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME = "cleanSwiftPackageProject"
+
         const val INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME = "initializeSwiftPackageProject"
         const val CREATE_PACKAGE_SWIFT_FILE_TASK_NAME = "createPackageSwiftFile"
         const val GENERATE_XCODE_TASK_NAME = "generateXcode"
         const val BUILD_FRAMEWORK_TASK_NAME = "buildFrameworks"
         const val GENERATE_DEF_FILE_TASK_NAME = "generateDefFile"
-        const val CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME = "cleanSwiftPackageProject"
+        const val SPM_IMPORT_TASK_NAME = "spmImport"
+
         const val BUNDLE_XCFRAMEWORK_TASK_NAME = "bundleXCFramework"
         const val ARCHIVE_XCFRAMEWORK_TASK_NAME = "archiveXCFramework"
         const val PUBLISH_XCFRAMEWORK_TASK_NAME = "publishXCFramework"

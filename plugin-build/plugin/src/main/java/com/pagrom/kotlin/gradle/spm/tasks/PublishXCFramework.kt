@@ -3,7 +3,6 @@ package com.pagrom.kotlin.gradle.spm.tasks
 import com.pagrom.kotlin.gradle.spm.plugin.KotlinSpmPlugin
 import com.pagrom.kotlin.gradle.spm.swiftPackageBuildDirs
 import groovy.text.SimpleTemplateEngine
-import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.transport.CredentialsProvider
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider

@@ -1,7 +1,6 @@
 package com.pagrom.kotlin.gradle.spm.entity.impl
 
 import com.pagrom.kotlin.gradle.spm.entity.DependencyMarker
-import com.pagrom.kotlin.gradle.spm.entity.impl.DependencyManager.Package
 import org.gradle.api.Named
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
@@ -28,7 +27,9 @@ class DependencyManager {
     data class Package(
         @Input val url: String,
         @Input @Optional val version: String? = null,
-        @Input val dependencyName: String = url,
+        @Input val dependencyName: String = url
+            .subSequence(url.lastIndexOf("/") + 1, url.length - ".git".length)
+            .toString(),
     ) : Named {
         override fun getName(): String = dependencyName
 

@@ -6,8 +6,8 @@ object PluginCoordinates {
 }
 
 object PluginBundle {
-    const val VCS = "https://github.com/zoldater/kotlin-spm-plugin"
-    const val WEBSITE = "https://github.com/zoldater/kotlin-spm-plugin"
+    const val VCS = "https://github.com/PaGr0m/kotlin-spm-plugin"
+    const val WEBSITE = "https://github.com/PaGr0m/kotlin-spm-plugin"
     const val DESCRIPTION = "Gradle plugin for Swift Package Manager integration with Kotlin Multiplatform projects"
     const val DISPLAY_NAME = "Gradle Plugin for SPM integration with Kotlin MPP projects"
     val TAGS = listOf(

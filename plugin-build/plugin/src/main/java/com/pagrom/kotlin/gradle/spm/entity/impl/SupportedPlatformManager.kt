@@ -7,10 +7,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.jetbrains.kotlin.konan.target.Family
 
-/**
- * @see [SupportedPlatform](https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html#supportedplatform)
- * @see [SupportedPlatform](https://github.com/apple/swift-package-manager/blob/main/Documentation/PackageDescription.md#supportedplatform)
- */
 @SupportedProductMarker
 class SupportedPlatformManager {
     val platforms = mutableListOf<SupportedPlatform>()

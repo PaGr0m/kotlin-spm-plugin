@@ -6,10 +6,6 @@ import com.pagrom.kotlin.gradle.spm.utils.StringUnaryPlusContainer
 import groovy.lang.Closure
 import org.gradle.util.ConfigureUtil
 
-/**
- * @see [Product](https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html#product)
- * @see [Product](https://github.com/apple/swift-package-manager/blob/main/Documentation/PackageDescription.md#product)
- */
 @ProductMarker
 class ProductManager {
     val products = mutableListOf<Product>()

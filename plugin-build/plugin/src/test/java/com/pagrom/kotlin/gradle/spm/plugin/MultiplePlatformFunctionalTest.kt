@@ -22,8 +22,8 @@ class MultiplePlatformFunctionalTest {
     private val initTaskName = "${KotlinSpmPlugin.INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME}${Family.OSX}"
     private val createPackageSwiftTaskName = "${KotlinSpmPlugin.CREATE_PACKAGE_SWIFT_FILE_TASK_NAME}${Family.OSX}"
     private val generateXcodeTaskName = "${KotlinSpmPlugin.GENERATE_XCODE_TASK_NAME}${Family.OSX}"
-    private val buildFrameworkTaskName1 = "${KotlinSpmPlugin.BUILD_FRAMEWORK_TASK_NAME}${Family.OSX}${FRAMEWORK1_NAME}"
-    private val buildFrameworkTaskName2 = "${KotlinSpmPlugin.BUILD_FRAMEWORK_TASK_NAME}${Family.OSX}${FRAMEWORK2_NAME}"
+    private val buildFrameworkTaskName1 = "${KotlinSpmPlugin.BUILD_FRAMEWORK_TASK_NAME}${Family.OSX}$FRAMEWORK1_NAME"
+    private val buildFrameworkTaskName2 = "${KotlinSpmPlugin.BUILD_FRAMEWORK_TASK_NAME}${Family.OSX}$FRAMEWORK2_NAME"
 
     private lateinit var settingsFile: File
     private lateinit var buildFile: File

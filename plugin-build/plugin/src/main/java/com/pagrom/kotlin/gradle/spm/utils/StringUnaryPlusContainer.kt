@@ -1,5 +1,6 @@
 package com.pagrom.kotlin.gradle.spm.utils
 
+@Suppress("UnnecessaryAbstractClass")
 abstract class StringUnaryPlusContainer {
     val container = mutableListOf<String>()
 

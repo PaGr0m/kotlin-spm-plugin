@@ -4,6 +4,7 @@ import com.pagrom.kotlin.gradle.spm.entity.PlatformMarker
 import com.pagrom.kotlin.gradle.spm.entity.Product
 import com.pagrom.kotlin.gradle.spm.entity.Target
 import groovy.lang.Closure
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
@@ -42,6 +43,7 @@ class PlatformManager {
     }
 
     // FIXME: Can't create sealed class
+    @Suppress("ForbiddenComment")
     abstract class SwiftPackageManager @Inject constructor(project: Project) {
         abstract val version: String
         abstract val family: Family
@@ -54,7 +56,8 @@ class PlatformManager {
         private val targetsContainer = project.container(Target::class.java)
 
         @Nested
-        val dependenciesContainer = project.container(DependencyManager.Package::class.java)
+        val dependenciesContainer: NamedDomainObjectContainer<DependencyManager.Package> =
+            project.container(DependencyManager.Package::class.java)
 
         @get:Nested
         val platforms: List<SupportedPlatformManager.SupportedPlatform>

@@ -6,11 +6,6 @@ import org.gradle.api.Named
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 
-/**
- * @see [Package.Dependency](https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html#package-dependency)
- * @see [Package.Dependency](https://github.com/apple/swift-package-manager/blob/main/Documentation/PackageDescription.md#package-dependency)
- */
-@Suppress("KDocUnresolvedReference")
 @DependencyMarker
 class DependencyManager {
     val dependencies = mutableListOf<Package>()

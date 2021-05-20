@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
+@Suppress("TooManyFunctions")
 abstract class KotlinSpmPlugin : Plugin<Project> {
 
     override fun apply(project: Project) = project.pluginManager.withPlugin(MULTIPLATFORM_PLUGIN_NAME) {
@@ -30,7 +31,6 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         registerInteropFrameworkTask(project, availablePlatforms, multiplatformExtension)
         registerBundleXCFrameworkTask(project, availablePlatforms, multiplatformExtension)
         registerArchiveXCFrameworkTask(project)
-
         registerPublishXCFramework(project, availablePlatforms)
     }
 

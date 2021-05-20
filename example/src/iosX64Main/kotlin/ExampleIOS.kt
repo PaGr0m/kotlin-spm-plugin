@@ -1,9 +1,3 @@
-import spm.Files.SWIFT_TYPEDEFS
-
 class ExampleIOS {
-    fun foo() {
-        println(SWIFT_TYPEDEFS)
-    }
-
-    fun bar() = "Hello from iosX64"
+    fun hello() = "Hello iOS from Kotlin"
 }

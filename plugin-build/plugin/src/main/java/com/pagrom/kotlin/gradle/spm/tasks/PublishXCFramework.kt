@@ -36,7 +36,6 @@ abstract class PublishXCFramework : Exec() {
     override fun exec() {
         // Create synthetic Swift Package project if not exist
         var syntheticFamily = false
-
         val familyDirectory = project.swiftPackageBuildDirs.platformRoot(family.get())
         if (!familyDirectory.exists()) {
             workingDir = familyDirectory
@@ -52,13 +51,13 @@ abstract class PublishXCFramework : Exec() {
         val archive = archiveXCFramework.get().asFile
 
         standardOutput = ByteArrayOutputStream()
-        workingDir = project.swiftPackageBuildDirs.platformRoot(Family.IOS)
+        workingDir = project.swiftPackageBuildDirs.platformRoot(family.get())
         commandLine(
             "swift", "package", "compute-checksum", archive.absolutePath
         )
 
         super.exec()
-        val checksum = standardOutput.toString()
+        val checksum = standardOutput.toString().dropLast(1)
 
         // Collect properties
         val properties = Properties().apply {
@@ -102,13 +101,15 @@ abstract class PublishXCFramework : Exec() {
             .call()
 
         val generatedDirectory = gitTemporaryFolder.resolve("generated")
+        if (!generatedDirectory.exists()) {
+            Files.createFile(generatedDirectory.toPath())
+        }
+        xcFrameworkArchive.copyTo(generatedDirectory.resolve(xcFrameworkArchive.name), true)
 
-        FileUtils.copyFile(
-            xcFrameworkArchive,
-            generatedDirectory.resolve(xcFrameworkArchive.name)
-        )
-
-        val binaryPackageSwift = Files.createFile(generatedDirectory.resolve("Package.swift").toPath()).toFile()
+        val binaryPackageSwift = generatedDirectory.resolve("Package.swift")
+        if (!binaryPackageSwift.exists()) {
+            Files.createFile(binaryPackageSwift.toPath())
+        }
         binaryPackageSwift.writeText(templateContent)
 
         git.add()

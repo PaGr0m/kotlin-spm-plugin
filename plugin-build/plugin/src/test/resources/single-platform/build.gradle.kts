@@ -1,7 +1,7 @@
 plugins {
     java
     kotlin("multiplatform")
-    id("com.pagrom.kotlin.gradle.spm.plugin")
+    id("com.github.pagr0m.kotlin.native.spm")
 }
 
 kotlin {

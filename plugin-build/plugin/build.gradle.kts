@@ -48,6 +48,12 @@ pluginBundle {
             displayName = PluginBundle.DISPLAY_NAME
         }
     }
+
+    mavenCoordinates {
+        groupId = PluginCoordinates.GROUP
+        artifactId = PluginCoordinates.ARTIFACT
+        version = PluginCoordinates.VERSION
+    }
 }
 
 tasks.create("setupPluginUploadFromEnvironment") {
@@ -62,4 +68,8 @@ tasks.create("setupPluginUploadFromEnvironment") {
         System.setProperty("gradle.publish.key", key)
         System.setProperty("gradle.publish.secret", secret)
     }
+}
+
+tasks.getByName<Jar>("jar") {
+    archiveBaseName.set(PluginCoordinates.ID)
 }

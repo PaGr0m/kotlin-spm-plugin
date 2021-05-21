@@ -9,5 +9,5 @@ pluginManagement {
 rootProject.name = ("kotlin-gradle-spm-plugin")
 
 include(":example")
-include(":untitled")
+include(":multiplatform-app-with-spm")
 includeBuild("plugin-build")

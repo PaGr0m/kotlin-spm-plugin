@@ -35,7 +35,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         // Integration Kotlin library as Swift Package to Xcode project
         registerBundleXCFrameworkTask(project, availablePlatforms, multiplatformExtension)
         registerArchiveXCFrameworkTask(project)
-        registerPublishXCFramework(project, availablePlatforms)
+//        registerPublishXCFramework(project, availablePlatforms)
     }
 
     private fun registerSpmCleanTask(
@@ -180,7 +180,9 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
                             interopTask.dependsOn(defFileTask)
                             interopTask.group = TASK_GROUP
 
+//                            val familyFramework = project.
                             interop.defFileProperty.set(defFileTask.flatMap { it.outputDefFile })
+//                            interop.compilerOpts.addAll()
                             interop.packageName = "spm.${dependency.dependencyName}"
                         }
                     }

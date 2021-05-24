@@ -27,7 +27,7 @@ abstract class KotlinSpmExtension @Inject constructor(private val project: Proje
         platformsManagerContainer.add(tvosManager)
     }
 
-    fun tvos(version: String, configure: Closure<*>) = ios(version) {
+    fun tvos(version: String, configure: Closure<*>) = tvos(version) {
         ConfigureUtil.configure(configure, this)
     }
 
@@ -36,7 +36,7 @@ abstract class KotlinSpmExtension @Inject constructor(private val project: Proje
         platformsManagerContainer.add(macosManager)
     }
 
-    fun macos(version: String, configure: Closure<*>) = ios(version) {
+    fun macos(version: String, configure: Closure<*>) = macos(version) {
         ConfigureUtil.configure(configure, this)
     }
 
@@ -45,7 +45,7 @@ abstract class KotlinSpmExtension @Inject constructor(private val project: Proje
         platformsManagerContainer.add(watchosManager)
     }
 
-    fun watchos(version: String, configure: Closure<*>) = ios(version) {
+    fun watchos(version: String, configure: Closure<*>) = watchos(version) {
         ConfigureUtil.configure(configure, this)
     }
 }

@@ -180,10 +180,19 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
                             interopTask.dependsOn(defFileTask)
                             interopTask.group = TASK_GROUP
 
-//                            val familyFramework = project.
+                            val familyFrameworks = project.swiftPackageBuildDirs
+                                .releaseDir(family)
+                                .resolve("${dependency.dependencyName}.framework")
+                            val headers = familyFrameworks.resolve("Headers")
+
                             interop.defFileProperty.set(defFileTask.flatMap { it.outputDefFile })
-//                            interop.compilerOpts.addAll()
                             interop.packageName = "spm.${dependency.dependencyName}"
+                            interop.compilerOpts.add("-F$familyFrameworks")
+                            interop.compilerOpts.add("-I$headers")
+
+                            interopTask.doLast{
+                                interop.compilerOpts.forEach { println(it) }
+                            }
                         }
                     }
                 }

@@ -32,6 +32,14 @@ kotlin {
             }
         }
 
-        ios("11") { }
+        ios("11") {
+            dependencies {
+                `package`(
+                    url = "https://github.com/AFNetworking/AFNetworking.git",
+                    version = "4.0.0",
+                    name = "AFNetworking"
+                )
+            }
+        }
     }
 }

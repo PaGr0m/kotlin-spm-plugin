@@ -8,6 +8,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
+import org.jetbrains.kotlin.gradle.plugin.mpp.Framework
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 @Suppress("TooManyFunctions")
@@ -29,6 +30,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         registerGenerateXcodeTask(project, availablePlatforms)
         registerBuildFrameworksTask(project, availablePlatforms)
         registerGenerateDefFileTask(project, availablePlatforms)
+        registerConfigureLinkerOptionsTask(project, availablePlatforms, multiplatformExtension)
         registerInteropFrameworkTask(project, availablePlatforms, multiplatformExtension)
         registerSpmImportTask(project, availablePlatforms, multiplatformExtension)
 
@@ -158,6 +160,36 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         }
     }
 
+    private fun registerConfigureLinkerOptionsTask(
+        project: Project,
+        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
+        multiplatformExtension: KotlinMultiplatformExtension,
+    ) {
+        multiplatformExtension.supportedTargets().all { mppTarget ->
+            platforms.all platforms@{ platform ->
+                val family = platform.family
+                if (family != mppTarget.konanTarget.family) return@platforms
+
+                platform.dependenciesContainer.all { dependency ->
+                    val buildFrameworkTask = project.tasks.named(
+                        "$BUILD_FRAMEWORK_TASK_NAME${platform.family}${dependency.dependencyName}",
+                        BuildFrameworksTask::class.java
+                    )
+
+                    mppTarget.binaries.withType(Framework::class.java) {
+                        it.isStatic = false
+                        it.transitiveExport = true
+                        it.linkerOpts(
+                            "-F${buildFrameworkTask.get().outputFrameworkDirectory.get().parent}",
+                            "-framework",
+                            dependency.dependencyName
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     @Suppress("UnstableApiUsage")
     private fun registerInteropFrameworkTask(
         project: Project,
@@ -183,16 +215,16 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
                             val familyFrameworks = project.swiftPackageBuildDirs
                                 .releaseDir(family)
                                 .resolve("${dependency.dependencyName}.framework")
-                            val headers = familyFrameworks.resolve("Headers")
+//                            val headers = familyFrameworks.resolve("Headers")
 
                             interop.defFileProperty.set(defFileTask.flatMap { it.outputDefFile })
                             interop.packageName = "spm.${dependency.dependencyName}"
-                            interop.compilerOpts.add("-F$familyFrameworks")
-                            interop.compilerOpts.add("-I$headers")
+//                            interop.compilerOpts.add("-F$familyFrameworks")
+//                            interop.compilerOpts.add("-I$headers")
 
-                            interopTask.doLast{
-                                interop.compilerOpts.forEach { println(it) }
-                            }
+//                            interopTask.doLast {
+//                                interop.compilerOpts.forEach { println(it) }
+//                            }
                         }
                     }
                 }

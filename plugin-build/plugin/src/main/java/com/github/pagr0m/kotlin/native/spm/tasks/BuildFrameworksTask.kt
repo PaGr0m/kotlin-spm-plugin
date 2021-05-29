@@ -38,10 +38,19 @@ abstract class BuildFrameworksTask : Exec() {
             "xcodebuild", "build",
             "-project", "${family.name}.xcodeproj",
             "-target", platformDependency.get(),
+            "-sdk", family.toSdk(),
             "-configuration", "Release",
             "-quiet"
         )
 
         super.exec()
+    }
+
+    private fun Family.toSdk() : String {
+        return when(this) {
+            Family.OSX -> "macosx"
+            Family.IOS -> "iphonesimulator"
+            else -> ""
+        }
     }
 }

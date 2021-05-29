@@ -19,7 +19,7 @@ class SwiftPackageBuildDirs(private val project: Project) {
 
     fun xcodeProjectFile(family: Family): File = platformRoot(family).resolve("${family}.$XCODEPROJECT_EXTENSION")
 
-    fun releaseDir(family: Family): File = platformRoot(family).resolve(BUILD_DIRECTORY).resolve(RELEASE_DIRECTORY)
+    fun releaseDir(family: Family): File = platformRoot(family).resolve(BUILD_DIRECTORY).resolve(family.toReleaseSdk())
 
     fun defsDir(family: Family): File = platformRoot(family).resolve(DEF_DIRECTORY)
 
@@ -28,6 +28,14 @@ class SwiftPackageBuildDirs(private val project: Project) {
     fun xcArchiveDir(): File = utils.resolve(XCFRAMEWORK_ARCHIVE_DIRECTORY)
 
     fun gitDir(): File = utils.resolve(GIT_DIRECTORY)
+
+    private fun Family.toReleaseSdk(): String {
+        return when (this) {
+            Family.OSX -> RELEASE_DIRECTORY
+            Family.IOS -> "$RELEASE_DIRECTORY-iphonesimulator"
+            else -> ""
+        }
+    }
 
     companion object {
         const val ROOT_DIRECTORY = "swiftPackageManager"

@@ -1,6 +1,5 @@
 package com.github.pagr0m.kotlin.native.spm.plugin
 
-import com.github.pagr0m.kotlin.native.spm.plugin.KotlinSpmPlugin
 import org.gradle.testkit.runner.BuildTask
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome

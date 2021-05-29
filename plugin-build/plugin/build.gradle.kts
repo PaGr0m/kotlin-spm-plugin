@@ -69,7 +69,3 @@ tasks.create("setupPluginUploadFromEnvironment") {
         System.setProperty("gradle.publish.secret", secret)
     }
 }
-
-tasks.getByName<Jar>("jar") {
-    archiveBaseName.set(PluginCoordinates.ID)
-}

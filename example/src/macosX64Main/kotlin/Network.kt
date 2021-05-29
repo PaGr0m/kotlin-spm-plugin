@@ -1,12 +1,10 @@
 import platform.Foundation.NSError
-import platform.Foundation.NSProgress
 import platform.Foundation.NSURLSessionDataTask
 import spm.AFNetworking.AFHTTPSessionManager
-import spm.AFNetworking.AFNetworkReachabilityStatus
 import spm.AFNetworking.AFNetworkReachabilityStatusNotReachable
 
 actual class Network actual constructor() {
-    actual fun hello(): String = "Hello iOS from Kotlin"
+    actual fun hello(): String = "Hello macOS from Kotlin"
 
     fun manager(): String = AFHTTPSessionManager.manager().toString()
 

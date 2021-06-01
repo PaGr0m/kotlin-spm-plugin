@@ -10,7 +10,7 @@ kotlin {
     spm {
         ios("11") {
             dependencies {
-                `package`(
+                packages(
                     url = "https://github.com/johnsundell/files.git",
                     version = "4.0.0",
                     name = "Files"

@@ -9,17 +9,17 @@ import org.gradle.api.tasks.Optional
 class DependencyManager {
     val dependencies = mutableListOf<Package>()
 
-    fun `package`(url: String, version: String, name: String) {
+    fun packages(url: String, version: String, name: String) {
         val dependency = Package(url, version, name)
         dependencies.add(dependency)
     }
 
-    fun `package`(url: String, version: String) {
+    fun packages(url: String, version: String) {
         val dependency = Package(url, version)
         dependencies.add(dependency)
     }
 
-    fun `package`(path: String) {
+    fun packages(path: String) {
         val dependency = Package(path)
         dependencies.add(dependency)
     }

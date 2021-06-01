@@ -11,7 +11,7 @@ kotlin {
     spm {
         ios("11") {
             dependencies {
-                `package`(
+                packages(
                     url = "https://github.com/johnsundell/files.git",
                     version = "4.0.0",
                     name = "Files"
@@ -21,12 +21,12 @@ kotlin {
 
         macos("11") {
             dependencies {
-                `package`(
+                packages(
                     url = "https://github.com/AFNetworking/AFNetworking.git",
                     version = "4.0.0",
                     name = "AFNetworking"
                 )
-                `package`(
+                packages(
                     url = "https://github.com/Alamofire/Alamofire.git",
                     version = "5.2.0",
                     name = "Alamofire"

@@ -32,7 +32,7 @@ plugins {
        spm {
            macos("11") {
                dependencies {
-                   `package`(
+                   packages(
                        url = "https://github.com/AFNetworking/AFNetworking.git",
                        version = "4.0.0",
                        name = "AFNetworking"

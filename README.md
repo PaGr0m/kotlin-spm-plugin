@@ -43,9 +43,9 @@ plugins {
    }
    ```
 
-4. Run the `cinterop<DependencyName><PlatformName>` gradle tasks for each dependency and platform.
+4. Run the `spmImport` gradle tasks for each dependency and platform.
    ```shell
-   ./gradlew cinteropAFNetworkingMacosX64
+   ./gradlew spmImport
    ```
 
 **NOTE:** At the moment, Kotlin is not directly compatible with Swift. Therefore, you can only connect Objective-C

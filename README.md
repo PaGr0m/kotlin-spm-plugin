@@ -157,6 +157,11 @@ the name of the resulting library (this is the name that will be used during imp
    **NOTE:** the binaryTarget name must match with name of the xcframework that is packed into the archive. By default,
    this is `KotlinLibrary`.
 
+## Samples
+- [Kotlin Multiplatform Mobile project](https://github.com/PaGr0m/kmm-example-with-spm) using network libraries (AFNetworking for iOS, OkHttp for Android)
+- [Kotlin Multiplatform Project](https://github.com/PaGr0m/kmp-example-macos-xcframework) adding Kotlin library as XCFramework to Xcode project
+- [Kotlin Multiplatform Project](https://github.com/PaGr0m/kmp-example-with-spm) for macOS target with Swift Package dependency 
+
 ## Contributing
 
 Feel free to open an issue or submit a pull request for any bugs/improvements.

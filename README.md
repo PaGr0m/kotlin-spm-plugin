@@ -1,90 +1,167 @@
-# kotlin-gradle-plugin-template 🐘
+# Kotlin plugin to support Swift Package dependencies
 
-[![Use this template](https://img.shields.io/badge/-Use%20this%20template-brightgreen)](https://github.com/cortinico/kotlin-gradle-plugin-template/generate) [![Pre Merge Checks](https://github.com/cortinico/kotlin-gradle-plugin-template/workflows/Pre%20Merge%20Checks/badge.svg)](https://github.com/cortinico/kotlin-gradle-plugin-template/actions?query=workflow%3A%22Pre+Merge+Checks%22)  [![License](https://img.shields.io/github/license/cortinico/kotlin-android-template.svg)](LICENSE) ![Language](https://img.shields.io/github/languages/top/cortinico/kotlin-android-template?color=blue&logo=kotlin)
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
-A simple Github template that lets you create a **Gradle Plugin** 🐘 project using **100% Kotlin** and be up and running in a **few seconds**. 
+This gradle plugin provides two-way interoperability between Kotlin dependencies and Kotlin-based Swift Package
+Multiplatform.
 
-This template is focused on delivering a project with **static analysis** and **continuous integration** already in place.
+## Add plugin
 
-## How to use 👣
+[comment]: <> (To use the plugin add a dependency in the plugins section.)
 
-Just click on [![Use this template](https://img.shields.io/badge/-Use%20this%20template-brightgreen)](https://github.com/cortinico/kotlin-gradle-plugin-template/generate) button to create a new repo starting from this template.
-
-Once created don't forget to update the:
-- [Plugin Coordinates](plugin-build/buildSrc/src/main/java/Coordinates.kt)
-- Plugin Usages (search for [com.ncorti.kotlin.gradle.template](https://github.com/cortinico/kotlin-gradle-plugin-template/search?q=com.ncorti.kotlin.gradle.template&unscoped_q=com.ncorti.kotlin.gradle.template) in the repo and replace it with your ID).
-
-## Features 🎨
-
-- **100% Kotlin-only template**.
-- Plugin build setup with **composite build**.
-- 100% Gradle Kotlin DSL setup.
-- Dependency versions managed via `buildSrc`.
-- CI Setup with GitHub Actions.
-- Kotlin Static Analysis via `ktlint` and `detekt`.
-- Publishing-ready to Gradle Portal.
-- Issues Template (bug report + feature request)
-- Pull Request Template.
-
-## Composite Build 📦
-
-This template is using a [Gradle composite build](https://docs.gradle.org/current/userguide/composite_builds.html) to build, test and publish the plugin. This means that you don't need to run Gradle twice to test the changes on your Gradle plugin (no more `publishToMavenLocal` tricks or so).
- 
-The included build is inside the [plugin-build](plugin-build) folder. 
-
-### `preMerge` task
-
-A `preMerge` task on the top level build is already provided in the template. This allows you to run all the `check` tasks both in the top level and in the included build.
-
-You can easily invoke it with:
-
-```
-./gradlew preMerge
+```kotlin
+plugins {
+    java
+    kotlin("multiplatform")
+    id("com.github.pagr0m.kotlin.native.spm")
+}
 ```
 
-If you need to invoke a task inside the included build with:
+## Using Swift package dependency as a Kotlin library
 
-```
-./gradlew -p plugin-build <task-name>
-```
+1. Define multiplatform targets (`macos`, `ios`, `tvos`, `watchos`).
+2. Declare a `spm` section with all the necessary package dependencies for each platform.
+3. Add package dependencies with URL link, version and name. This name would be used as an import in the Kotlin project.
 
+   `build.gradle.kts` example:
 
-### Dependency substitution
+   ```kotlin
+   kotlin {
+       macosX64()
+   
+       spm {
+           macos("11") {
+               dependencies {
+                   packages(
+                       url = "https://github.com/AFNetworking/AFNetworking.git",
+                       version = "4.0.0",
+                       name = "AFNetworking"
+                   )
+               }
+           }
+       }
+   }
+   ```
 
-Please note that the project relies on module name/group in order for [dependency substitution](https://docs.gradle.org/current/userguide/resolution_rules.html#sec:dependency_substitution_rules) to work properly. If you change only the plugin ID everything will work as expected. If you change module name/group, things might break and you probably have to specify a [substitution rule](https://docs.gradle.org/current/userguide/resolution_rules.html#sub:project_to_module_substitution).
+4. Run the `cinterop<DependencyName><PlatformName>` gradle tasks for each dependency and platform.
+   ```shell
+   ./gradlew cinteropAFNetworkingMacosX64
+   ```
 
+**NOTE:** At the moment, Kotlin is not directly compatible with Swift. Therefore, you can only connect Objective-C
+libraries that have a Swift package file.
 
-## Publishing 🚀
+## Using the Kotlin library as a Swift Package dependency
 
-This template is ready to let you publish to [Gradle Portal](https://plugins.gradle.org/).
+To create a Kotlin library as a swift package dependency, you need to add the Kotlin multiplatform settings and specify
+the name of the resulting library (this is the name that will be used during import).
 
-The [![Publish Plugin to Portal](https://github.com/cortinico/kotlin-gradle-plugin-template/workflows/Publish%20Plugin%20to%20Portal/badge.svg?branch=1.0.0)](https://github.com/cortinico/kotlin-gradle-plugin-template/actions?query=workflow%3A%22Publish+Plugin+to+Portal%22) Github Action will take care of the publishing whenever you **push a tag**.
+1. Extend targets configuration with framework baseName (`KlibIOS` in this example. Could be any). This name would be
+   used as Swift package name in XCode project.
+2. Declare a `spm` section with needed platforms. Note that you can add Swift package dependencies
+   too ([see first section](#using-swift-package-dependency-as-a-kotlin-library)).
 
-Please note that you need to configure two secrets: `GRADLE_PUBLISH_KEY` and `GRADLE_PUBLISH_SECRET` with the credetials you can get from your profile on the Gradle Portal.
+   `build.gradle.kts` example:
 
-## 100% Kotlin 🅺
+   ```kotlin
+   kotlin {
+       iosArm64 {
+           binaries {
+               framework {
+                   baseName = "KlibIOS"
+               }
+           }
+       }
+   
+       spm {
+           ios("11") { }
+       }
+   }
+   ```
 
-This template is designed to use Kotlin everywhere. The build files are written using [**Gradle Kotlin DSL**](https://docs.gradle.org/current/userguide/kotlin_dsl.html) as well as the [Plugin DSL](https://docs.gradle.org/current/userguide/plugins.html#sec:plugins_block) to setup the build.
+3. Create xcframework
+   ```shell
+   ./gradlew bundleXCFramework
+   ```
+   XCFramework will be located in `build/spmUtils/xcframework/KotlinLibrary.xcframework`
+4. Connect xcframework to XCode project.
 
-Dependencies are centralized inside the [Dependencies.kt](buildSrc/src/main/java/Dependencies.kt) file in the `buildSrc` folder. Please note that there is another [Dependencies.kt](plugin-build/buildSrc/src/main/java/Dependencies.kt) inside the included build to keep the versions isolated.
+    - Option 1: via XCode GUI
 
-Moreover, a minimalistic Gradle Plugin is already provided in Kotlin to let you easily start developing your own around it.
+      Open XCode project settings and add link to xcframework
+      ![XCode-import-XCFramework](./images/XCode-import-XCFramework.png)
 
-## Static Analysis 🔍
+    - Option 2: via `Package.swift` file
 
-This template is using [**ktlint**](https://github.com/pinterest/ktlint) with the [ktlint-gradle](https://github.com/jlleitschuh/ktlint-gradle) plugin to format your code. To reformat all the source code as well as the buildscript you can run the `ktlintFormat` gradle task.
+      ```swift
+      // swift-tools-version:5.3 
+      import PackageDescription
 
-This template is also using [**detekt**](https://github.com/arturbosch/detekt) to analyze the source code, with the configuration that is stored in the [detekt.yml](config/detekt/detekt.yml) file (the file has been generated with the `detektGenerateConfig` task).
+      let package = Package(
+         name: "ExampleWithKotlinLibrary",
 
-## CI ⚙️
+         products: [
+            .library(
+               name: "ExampleWithKotlinLibrary",
+               targets: [
+                  "ExampleWithKotlinLibrary",
+                  "KotlinLibrary"
+               ]
+            )
+         ],
 
-This template is using [**GitHub Actions**](https://github.com/cortinico/kotlin-android-template/actions) as CI. You don't need to setup any external service and you should have a running CI once you start using this template.
+         targets: [
+            .target(
+               name: "ExampleWithKotlinLibrary",
+               dependencies: []
+            ),
 
-There are currently the following workflows available:
-- [Validate Gradle Wrapper](.github/workflows/gradle-wrapper-validation.yml) - Will check that the gradle wrapper has a valid checksum
-- [Pre Merge Checks](.github/workflows/pre-merge.yaml) - Will run the `preMerge` tasks as well as trying to run the Gradle plugin.
-- [Publish to Plugin Portal](.github/workflows/pre-merge.yaml) - Will run the `publishPlugin` task when pushing a new tag.
+            .binaryTarget(
+               name: "KotlinLibrary",
+               path: "./xcframework/KotlinLibrary.xcframework"
+            )
+         ]
+      )
+      ```
 
-## Contributing 🤝
+--- 
 
-Feel free to open a issue or submit a pull request for any bugs/improvements.
+### Publish xcframework to Git
+
+0. Complete 1-3 steps in [section above](#using-the-kotlin-library-as-a-swift-package-dependency).
+1. Add credentials to `local.properties` file.
+   ```kotlin
+   git.credentials.username = USERNAME
+   git.credentials.password = PASSWORD
+   git.credentials.giturl = URL_TO_GIT_REPOSITORY.git
+   ```
+   **NOTE:** Do not forget to add this file to `.gitignore`.
+
+2. Run publishXCFramework task to zip and publish it.
+   ```shell
+   ./gradlew publishXCFramework
+   ```
+
+3. Add binaryTarget in `Package.swift` file.
+      ```swift
+      let package = Package(
+         // some code
+         
+         .binaryTarget(
+            name: "KotlinLibrary",
+            url: "pathToGitUrl",
+            checksum: "..."
+         )
+      )
+      ```
+   **NOTE:** the binaryTarget name must match with name of the xcframework that is packed into the archive. By default,
+   this is `KotlinLibrary`.
+
+## Samples
+- [Kotlin Multiplatform Mobile project](https://github.com/PaGr0m/kmm-example-with-spm) using network libraries (AFNetworking for iOS, OkHttp for Android)
+- [Kotlin Multiplatform Project](https://github.com/PaGr0m/kmp-example-macos-xcframework) adding Kotlin library as XCFramework to Xcode project
+- [Kotlin Multiplatform Project](https://github.com/PaGr0m/kmp-example-with-spm) for macOS target with Swift Package dependency 
+
+## Contributing
+
+Feel free to open an issue or submit a pull request for any bugs/improvements.

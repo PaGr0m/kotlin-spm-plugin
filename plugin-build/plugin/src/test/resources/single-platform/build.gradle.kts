@@ -5,21 +5,15 @@ plugins {
 }
 
 kotlin {
-    iosX64 {
-        binaries {
-            framework {
-                baseName = "KotlinLibrary"
-            }
-        }
-    }
+    iosX64()
 
     spm {
         ios("11") {
             dependencies {
                 packages(
-                    url = "https://github.com/AFNetworking/AFNetworking.git",
+                    url = "https://github.com/johnsundell/files.git",
                     version = "4.0.0",
-                    name = "AFNetworking"
+                    name = "Files"
                 )
             }
         }

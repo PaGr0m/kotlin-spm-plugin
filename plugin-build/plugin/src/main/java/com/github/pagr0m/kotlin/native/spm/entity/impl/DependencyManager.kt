@@ -24,6 +24,18 @@ class DependencyManager {
         dependencies.add(dependency)
     }
 
+    /**
+     * Version definitions based on:
+     * https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html
+     */
+    fun fromVersion(version: String) = "from: \"$version\""
+
+    fun exactVersion(version: String) = ".exact(\"$version\")"
+
+    fun versionRange(minVersion: String, maxVersion: String) = "\"$minVersion\"..<\"$maxVersion\""
+
+    fun versionClosedRange(minVersion: String, maxVersion: String) = "\"$minVersion\"...\"$maxVersion\""
+
     data class Package(
         @Input val url: String,
         @Input @Optional val version: String? = null,
@@ -38,7 +50,7 @@ class DependencyManager {
                 .package(
                     name: "$dependencyName",
                     url: "$url",
-                    from: "$version"
+                    $version
                 )
             """.trimIndent()
         }

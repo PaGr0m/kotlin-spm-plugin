@@ -18,7 +18,7 @@ kotlin {
             dependencies {
                 packages(
                     url = "https://github.com/AFNetworking/AFNetworking.git",
-                    version = "4.0.0",
+                    version = exactVersion("4.0.1"),
                     name = "AFNetworking"
                 )
             }

@@ -1,7 +1,7 @@
 object PluginCoordinates {
     const val GROUP = "com.github.pagr0m"
     const val ARTIFACT = "kotlin.native.spm"
-    const val VERSION = "0.1.1"
+    const val VERSION = "0.1.2"
 
     const val ID = "$GROUP.$ARTIFACT"
     const val IMPLEMENTATION_CLASS = "$ID.plugin.KotlinSpmPlugin"

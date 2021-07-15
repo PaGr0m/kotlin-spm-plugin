@@ -22,7 +22,26 @@ plugins {
 1. Define multiplatform targets (`macos`, `ios`, `tvos`, `watchos`).
 2. Declare a `spm` section with all the necessary package dependencies for each platform.
 3. Add package dependencies with URL link, version and name. This name would be used as an import in the Kotlin project.
+   Plugin supports all package versioning strategies described here: https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html
+   and provides convenient methods to define them:
+   
+   ```
+   fun fromVersion(version: String)
 
+   fun exactVersion(version: String)
+
+   fun versionRange(minVersion: String, maxVersion: String)
+
+   fun versionClosedRange(minVersion: String, maxVersion: String)
+
+   fun upToNextMajor(version: String)
+
+   fun upToNextMinor(version: String)
+
+   fun branch(branchName: String)
+
+   fun revision(ref: String)
+   ```
    `build.gradle.kts` example:
 
    ```kotlin
@@ -34,7 +53,7 @@ plugins {
                dependencies {
                    packages(
                        url = "https://github.com/AFNetworking/AFNetworking.git",
-                       version = "4.0.0",
+                       version = exactVersion("4.0.0"),
                        name = "AFNetworking"
                    )
                }

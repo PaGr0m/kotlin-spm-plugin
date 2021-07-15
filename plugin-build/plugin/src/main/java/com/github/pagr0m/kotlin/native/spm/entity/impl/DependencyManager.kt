@@ -36,6 +36,14 @@ class DependencyManager {
 
     fun versionClosedRange(minVersion: String, maxVersion: String) = "\"$minVersion\"...\"$maxVersion\""
 
+    fun upToNextMajor(version: String) = ".upToNextMajor(from: \"$version\")"
+
+    fun upToNextMinor(version: String) = ".upToNextMinor(from: \"$version\")"
+
+    fun branch(branchName: String) = ".branch(\"$branchName\")"
+
+    fun revision(ref: String) = ".revision(\"$ref\")"
+
     data class Package(
         @Input val url: String,
         @Input @Optional val version: String? = null,

@@ -81,9 +81,14 @@ the name of the resulting library (this is the name that will be used during imp
 
 3. Create xcframework
    ```shell
-   ./gradlew bundleXCFramework
+   ./gradlew createXCFramework
    ```
    XCFramework will be located in `build/spmUtils/xcframework/KotlinLibrary.xcframework`
+3.1 Create Swift Package
+    ```shell
+   ./gradlew createSwiftPackage
+   ```
+   Package.swift & Framework will be located in output file dir.
 4. Connect xcframework to XCode project.
 
     - Option 1: via XCode GUI

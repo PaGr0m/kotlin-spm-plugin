@@ -16,7 +16,7 @@ abstract class GenerateDefFileTask : DefaultTask() {
         group = KotlinSpmPlugin.TASK_GROUP
     }
 
-    @Nested
+    @Input
     val platformFamily: Property<Family> = project.objects.property(Family::class.java)
 
     @Input

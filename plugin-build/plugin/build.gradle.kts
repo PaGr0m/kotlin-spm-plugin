@@ -1,8 +1,9 @@
 import BuildPluginsVersion.KOTLIN
 
 plugins {
-    kotlin("jvm")
+    kotlin("jvm")// version BuildPluginsVersion.KOTLIN apply false
     id("java-gradle-plugin")
+    id("maven-publish")
     id("com.gradle.plugin-publish")
 }
 
@@ -20,16 +21,23 @@ dependencies {
 
     testImplementation(TestingLib.JUNIT)
 }
-
+/*
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+*/
 gradlePlugin {
     plugins {
         create(PluginCoordinates.ID) {
             id = PluginCoordinates.ID
+            displayName = PluginBundle.DISPLAY_NAME
+            description = PluginBundle.DESCRIPTION
+            tags = PluginBundle.TAGS
             implementationClass = PluginCoordinates.IMPLEMENTATION_CLASS
             version = PluginCoordinates.VERSION
         }
@@ -37,23 +45,9 @@ gradlePlugin {
 }
 
 // Configuration Block for the Plugin Marker artifact on Plugin Central
-pluginBundle {
-    website = PluginBundle.WEBSITE
-    vcsUrl = PluginBundle.VCS
-    description = PluginBundle.DESCRIPTION
-    tags = PluginBundle.TAGS
-
-    plugins {
-        getByName(PluginCoordinates.ID) {
-            displayName = PluginBundle.DISPLAY_NAME
-        }
-    }
-
-    mavenCoordinates {
-        groupId = PluginCoordinates.GROUP
-        artifactId = PluginCoordinates.ARTIFACT
-        version = PluginCoordinates.VERSION
-    }
+gradlePlugin {
+     website = PluginBundle.WEBSITE
+     vcsUrl = PluginBundle.VCS
 }
 
 tasks.create("setupPluginUploadFromEnvironment") {

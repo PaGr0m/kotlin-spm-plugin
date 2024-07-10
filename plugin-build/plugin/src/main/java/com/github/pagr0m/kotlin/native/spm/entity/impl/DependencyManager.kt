@@ -3,6 +3,7 @@ package com.github.pagr0m.kotlin.native.spm.entity.impl
 import com.github.pagr0m.kotlin.native.spm.entity.DependencyMarker
 import org.gradle.api.Named
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 
 @DependencyMarker
@@ -31,12 +32,19 @@ class DependencyManager {
             .subSequence(url.lastIndexOf("/") + 1, url.length - ".git".length)
             .toString(),
     ) : Named {
+        @Internal
         override fun getName(): String = dependencyName
+
+        @get:Internal
+        val packageName: String
+            get() = url
+                .subSequence(url.lastIndexOf("/") + 1, url.length - ".git".length)
+                .toString()
 
         fun convertToPackageContent(): String {
             return """
                 .package(
-                    name: "$dependencyName",
+                    name: "$packageName",
                     url: "$url",
                     from: "$version"
                 )

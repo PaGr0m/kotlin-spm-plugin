@@ -4,10 +4,10 @@ object Versions {
 }
 
 object BuildPluginsVersion {
-    const val DETEKT = "1.15.0"
-    const val KOTLIN = "1.4.30"
+    const val DETEKT = "1.23.6"
+    const val KOTLIN = "2.0.0"
     const val KTLINT = "10.0.0"
-    const val PLUGIN_PUBLISH = "0.13.0"
+    const val PLUGIN_PUBLISH = "1.0.0"
     const val VERSIONS_PLUGIN = "0.36.0"
 }
 

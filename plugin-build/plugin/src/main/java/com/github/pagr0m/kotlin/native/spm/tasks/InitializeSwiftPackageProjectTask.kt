@@ -19,7 +19,7 @@ abstract class InitializeSwiftPackageProjectTask : Exec() {
         group = KotlinSpmPlugin.TASK_GROUP
     }
 
-    @Nested
+    @Input
     val platformFamily: Property<Family> = project.objects.property(Family::class.java)
 
     @get:Internal

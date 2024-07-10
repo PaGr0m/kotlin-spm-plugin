@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.6
 
 import PackageDescription
 
@@ -10,6 +10,7 @@ let package = Package(
     products: [
         .library(
             name: "$PLATFORM_NAME",
+            // type: .dynamic,
             targets: ["$PLATFORM_NAME"]),
     ],
     dependencies: [

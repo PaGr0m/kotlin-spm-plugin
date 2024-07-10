@@ -2,6 +2,7 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN apply false
+    id("maven-publish")
     id("com.gradle.plugin-publish") version BuildPluginsVersion.PLUGIN_PUBLISH apply false
     id("io.gitlab.arturbosch.detekt") version BuildPluginsVersion.DETEKT
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
@@ -15,7 +16,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        jcenter()
     }
 
     apply {

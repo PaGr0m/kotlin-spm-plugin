@@ -20,7 +20,7 @@ abstract class CreatePackageSwiftFileTask : DefaultTask() {
 
     private val swiftPackageTemplateContent = this::class.java.getResource("/Package.swift")!!.readText()
 
-    @Nested
+    @Input
     val platformFamily: Property<Family> = project.objects.property(Family::class.java)
 
     @Input
@@ -40,11 +40,11 @@ abstract class CreatePackageSwiftFileTask : DefaultTask() {
 
         val dependencyArea = platformDependencies
             .toList()
-            .joinToString(", ") { it.convertToPackageContent() }
+            .joinToString(",\n") { it.convertToPackageContent() }
 
         val targetDependencyArea = platformDependencies
             .toList()
-            .joinToString(", ") { "\"${it.dependencyName}\"" }
+            .joinToString(",\n") { ".productItem(name: \"${it.dependencyName}\", package: \"${it.packageName}\")" }
 
         project.swiftPackageBuildDirs.platformRoot(family)
             .resolve("Package.swift")

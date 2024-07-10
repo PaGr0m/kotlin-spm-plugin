@@ -4,6 +4,7 @@ import com.github.pagr0m.kotlin.native.spm.plugin.KotlinSpmPlugin
 import com.github.pagr0m.kotlin.native.spm.swiftPackageBuildDirs
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.konan.target.Family
@@ -14,7 +15,7 @@ abstract class CleanSwiftPackageProjectTask : DefaultTask() {
         group = KotlinSpmPlugin.TASK_GROUP
     }
 
-    @Nested
+    @Input
     val platformFamily: Property<Family> = project.objects.property(Family::class.java)
 
     @TaskAction

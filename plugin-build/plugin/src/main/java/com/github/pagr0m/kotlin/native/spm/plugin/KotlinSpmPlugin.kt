@@ -27,7 +27,6 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         // Integration Swift Package dependency to Kotlin
         registerInitializeSwiftPackageProjectTask(project, availablePlatforms)
         registerCreatePackageSwiftFileTask(project, availablePlatforms)
-        registerGenerateXcodeTask(project, availablePlatforms)
         registerBuildFrameworksTask(project, availablePlatforms)
         registerGenerateDefFileTask(project, availablePlatforms)
         registerConfigureLinkerOptionsTask(project, availablePlatforms, multiplatformExtension)
@@ -59,11 +58,17 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
     ) {
         platforms.all { platform ->
+            val cleanSwiftPackageTask = project.tasks.named(
+                "$CLEAN_SWIFT_PACKAGE_PROJECT_TASK_NAME${platform.family}",
+                CleanSwiftPackageProjectTask::class.java
+            )
+
             project.tasks.register(
                 "$INITIALIZE_SWIFT_PACKAGE_PROJECT_TASK_NAME${platform.family}",
                 InitializeSwiftPackageProjectTask::class.java
             ) { task ->
                 task.platformFamily.set(platform.family)
+                task.dependsOn(cleanSwiftPackageTask)
             }
         }
     }
@@ -91,7 +96,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         }
     }
 
-    private fun registerGenerateXcodeTask(
+    private fun registerBuildFrameworksTask(
         project: Project,
         platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
     ) {
@@ -102,36 +107,13 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
             )
 
             project.tasks.register(
-                "$GENERATE_XCODE_TASK_NAME${platform.family}",
-                GenerateXcodeTask::class.java
+                "$BUILD_FRAMEWORK_TASK_NAME${platform.family}",
+                BuildFrameworksTask::class.java
             ) { task ->
                 task.platformFamily.set(platform.family)
+                task.platformDependencies.set(platform.dependenciesContainer.map { it.name })
 
                 task.dependsOn(createPackageSwiftFileTask)
-            }
-        }
-    }
-
-    private fun registerBuildFrameworksTask(
-        project: Project,
-        platforms: NamedDomainObjectContainer<PlatformManager.SwiftPackageManager>,
-    ) {
-        platforms.all { platform ->
-            val generateXcodeTask = project.tasks.named(
-                "$GENERATE_XCODE_TASK_NAME${platform.family}",
-                GenerateXcodeTask::class.java
-            )
-
-            platform.dependenciesContainer.all { dependency ->
-                project.tasks.register(
-                    "$BUILD_FRAMEWORK_TASK_NAME${platform.family}${dependency.dependencyName}",
-                    BuildFrameworksTask::class.java
-                ) { task ->
-                    task.platformFamily.set(platform.family)
-                    task.platformDependency.set(dependency.dependencyName)
-
-                    task.dependsOn(generateXcodeTask)
-                }
             }
         }
     }
@@ -143,7 +125,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
         platforms.all { platform ->
             platform.dependenciesContainer.all { dependency ->
                 val buildFrameworkTask = project.tasks.named(
-                    "$BUILD_FRAMEWORK_TASK_NAME${platform.family}${dependency.dependencyName}",
+                    "$BUILD_FRAMEWORK_TASK_NAME${platform.family}",
                     BuildFrameworksTask::class.java
                 )
 
@@ -172,7 +154,7 @@ abstract class KotlinSpmPlugin : Plugin<Project> {
 
                 platform.dependenciesContainer.all { dependency ->
                     val buildFrameworkTask = project.tasks.named(
-                        "$BUILD_FRAMEWORK_TASK_NAME${platform.family}${dependency.dependencyName}",
+                        "$BUILD_FRAMEWORK_TASK_NAME${platform.family}",
                         BuildFrameworksTask::class.java
                     )
 

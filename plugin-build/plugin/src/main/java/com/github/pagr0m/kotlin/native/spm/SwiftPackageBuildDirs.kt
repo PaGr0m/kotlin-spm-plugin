@@ -11,13 +11,13 @@ class SwiftPackageBuildDirs(private val project: Project) {
     private val utils: File
         get() = project.buildDir.resolve("spmUtils")
 
+    fun derivedDataPath(): File = root.resolve("derivedData")
+
     fun platformRoot(family: Family): File = root.resolve(family.name)
 
     fun packageSwiftFile(family: Family): File = platformRoot(family).resolve(PACKAGE_SWIFT_FILE)
 
     fun packageResolvedFile(family: Family): File = platformRoot(family).resolve(PACKAGE_SWIFT_RESOLVED_FILE)
-
-    fun xcodeProjectFile(family: Family): File = platformRoot(family).resolve("${family}.$XCODEPROJECT_EXTENSION")
 
     fun releaseDir(family: Family): File = platformRoot(family).resolve(BUILD_DIRECTORY).resolve(family.toReleaseSdk())
 
